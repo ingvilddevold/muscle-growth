@@ -1,0 +1,27 @@
+executor: cluster-generic
+cluster-generic-submit-cmd: module load mpich &&
+  mkdir -p logs/{rule} &&
+  sbatch
+  --partition={resources.partition}
+  --ntasks={resources.ntasks}
+  --job-name={rule}-{wildcards}
+  --output=logs/{rule}/{wildcards}-%j.out
+  --time={resources.time}
+default-resources:
+  - partition=defq,milanq,fpgaq,genoaxq
+  - mem="10G"
+  - time="30:00"
+  - ntasks=1
+  - hint=nomultithread
+restart-times: 0
+max-jobs-per-second: 12
+max-status-checks-per-second: 12
+local-cores: 5
+cores: 12
+latency-wait: 60
+jobs: 100
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+scheduler: greedy
+use-conda: True
