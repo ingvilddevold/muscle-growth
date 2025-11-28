@@ -1,0 +1,21 @@
+__pycache__
+lib/
+.cache/
+build/
+*.egg-info/
+
+results/
+
+# Slurm output files
+*.err
+*.out
+
+# OS X files
+.DS_Store
+
+# VS Code
+.vscode
+.devcontainer
+
+# Snakemake
+.snakemake/
