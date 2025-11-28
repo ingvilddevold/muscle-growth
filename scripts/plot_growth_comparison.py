@@ -87,6 +87,7 @@ def main(
         ax.spines["right"].set_visible(False)
         ax.tick_params(top=False, right=False)
         ax.minorticks_off()
+        ax.set_xticks([0, 3, 6, 9])
 
     # Get handles and labels from the first plot to create a single legend
     handles, labels = axes[0].get_legend_handles_labels()
