@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="https://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="Grid" GridType="Uniform">
+      <Topology TopologyType="Tetrahedron" NumberOfElements="8641" NodesPerElement="4">
+        <DataItem Dimensions="8641 4" NumberType="Int" Format="HDF">VHF_Right_Muscle_Semitendonosus_smooth.h5:/Mesh/Grid/topology</DataItem>
+      </Topology>
+      <Geometry GeometryType="XYZ">
+        <DataItem Dimensions="2525 3" Format="HDF">VHF_Right_Muscle_Semitendonosus_smooth.h5:/Mesh/Grid/geometry</DataItem>
+      </Geometry>
+    </Grid>
+    <Grid Name="ft" GridType="Uniform">
+      <xi:include xpointer="xpointer(/Xdmf/Domain/Grid/Geometry)" />
+      <Topology TopologyType="Triangle" NumberOfElements="3768" NodesPerElement="3">
+        <DataItem Dimensions="3768 3" NumberType="Int" Format="HDF">VHF_Right_Muscle_Semitendonosus_smooth.h5:/MeshTags/ft/topology</DataItem>
+      </Topology>
+      <Attribute Name="ft" AttributeType="Scalar" Center="Cell">
+        <DataItem Dimensions="3768 1" Format="HDF">VHF_Right_Muscle_Semitendonosus_smooth.h5:/MeshTags/ft/Values</DataItem>
+      </Attribute>
+    </Grid>
+    <Grid Name="ft_small" GridType="Uniform">
+      <xi:include xpointer="xpointer(/Xdmf/Domain/Grid/Geometry)" />
+      <Topology TopologyType="Triangle" NumberOfElements="3768" NodesPerElement="3">
+        <DataItem Dimensions="3768 3" NumberType="Int" Format="HDF">VHF_Right_Muscle_Semitendonosus_smooth.h5:/MeshTags/ft_small/topology</DataItem>
+      </Topology>
+      <Attribute Name="ft_small" AttributeType="Scalar" Center="Cell">
+        <DataItem Dimensions="3768 1" Format="HDF">VHF_Right_Muscle_Semitendonosus_smooth.h5:/MeshTags/ft_small/Values</DataItem>
+      </Attribute>
+    </Grid>
+  </Domain>
+</Xdmf>
