@@ -34,7 +34,7 @@ snakemake -s scripts/figureX.smk --profile scripts/ex3
 ```
 or if running locally, 
 ```bash
-snakemake -s scripts/figureX.smk --use-conda
+snakemake -s scripts/figureX.smk --use-conda --cores 4
 ```
 
 ## Demo scripts
