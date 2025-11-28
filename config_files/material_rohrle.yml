@@ -1,0 +1,9 @@
+material_parameters:
+  c1 : 0.01e+6 # 0.01 MPa
+  c2 : 0.01e+6 # 0.01 MPa
+  sigma_pass_ff : 0.3e+6 # 0.03 MPa
+  sigma_act_ff : 0.3e+6 # 0.03 MPa
+  lmbda_0: 1.4 # optimal fiber length
+  g1: 0.05 # coefficient f_passive
+  g2: 6.6 # coefficient f_passive
+  k_tendon: 1.0e+5 # tendon stiffness for Robin BC

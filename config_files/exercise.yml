@@ -1,0 +1,47 @@
+# Parameter values from Villota-Narvaez, 2021 
+# DOI: 10.1016/j.biosystems.2021.104355
+exercise_parameters:
+  # Intinsic growth rates (first two being reference values)
+  a10: 9.000e-2 # hours^−1
+  a20: 4.875e-1 # hours^−1
+  a3: 1.068e-2 # hours^-1
+  a4: 4.635e-3 # hours^-1
+
+  # Self-inhibition rates
+  b1: 2.000 # hours^-1
+  b2: 5.000e-1 # hours^-1
+  b3: 2.000e-2 # hours^-1
+  b4: 1.000e-2 # hours^-1
+
+  # Coupling strengths between species
+  c21: 2.846e-1 # hours^-1
+  c32: 2.000e-3 # hours^-1
+  c42: 1.139e-3 # hours^-1
+  c43: 2.500e-3 # hours^-1
+
+  # Minimum and maximum values of the myofibril population
+  z_min: 0.5000 # a.u.
+  z_max: 1.300 # a.u.
+
+  # Thresholds
+  x3_th: 4.340e-1 # a.u.
+  x4_th: 4.690e-1 # a.u.
+
+  # Parameters for protein synthesis and degradation, respecitvely
+  k1: 2.500e-2 # hour^-1
+  k2: 1.900e-2 # hour^−1
+
+  # Parameters for a2(t)
+  tau_h: 6 # hours
+  t1: 17 # hours
+  
+  # Initial values
+  x1_0: 1.000e-2  # a.u.
+  x2_0: 9.880e-1  # a.u.
+  x3_0: 4.318e-1  # a.u.
+  x4_0: 4.692e-1  # a.u.
+  z_0: 1.000  # a.u.
+
+  # Time step
+  dt: 0.05 # hours
+  
