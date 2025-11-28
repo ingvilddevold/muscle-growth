@@ -1,0 +1,27 @@
+name: musclex
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12 # pin to avoid pyvista issues
+  - fenics-dolfinx>=0.10.0
+  - openmpi
+  - pyvista
+  - meshio
+  - ipython
+  - pyyaml
+  - matplotlib
+  - scienceplots
+  - scipy
+  - seaborn
+  - typer
+  - adios2
+  - imageio
+  - imageio-ffmpeg
+  - salib
+  - tqdm
+  - pip
+  - pip:
+    - -e . 
+    - adios4dolfinx
+    - gmsh
