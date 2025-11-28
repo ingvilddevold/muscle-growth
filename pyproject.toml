@@ -1,0 +1,29 @@
+[build-system] # Require setuptool version due to https://github.com/pypa/setuptools/issues/2938
+requires = ["setuptools>=61.0.0", "wheel"]
+
+[project]
+name = "muscle-growth"
+authors = [
+    {name = "Ingvild Devold", email = "ingvildsd@simula.no"},
+    ]
+version = "0.1.0.dev0"
+description = "Skeletal muscle growth simulation in FEniCSx"
+readme = "README.md"
+requires-python = ">=3.8"
+# Direct dependencies
+dependencies = [
+    "pyvista",
+    "ipython",
+    "pyyaml",
+    "scipy",
+    "seaborn",
+    "scienceplots",
+    "typer",
+    "salib",
+    "tqdm",
+    "adios4dolfinx",
+    "gmsh",
+    "imageio",
+    "imageio-ffmpeg",
+    "meshio"
+]
