@@ -43,18 +43,18 @@ class PostProcessor:
         # --- Plotting Configuration ---
         self.plot_quantities = {
             "displacement": {
-                "title": "", #Displ. (mm)",
+                "title": "",  # Displacement (mm)
                 "cmap": "viridis",
                 "conversionfactor": 1e3,  # m to mm
             },
             "lambda": {
-                "title": "", #Fiber stretch",
+                "title": "",  # Fiber stretch
                 "cmap": "plasma",
                 "conversionfactor": 1.0,
             },
             "von_mises": {
-                "title": "", #VM stress (kPa)",
-                "cmap": "coolwarm",
+                "title": "",  # Von Mises stress (kPa)
+                "cmap": "GnBu",
                 "conversionfactor": 1e-3,  # Pa to kPa
             },
         }
@@ -208,7 +208,7 @@ class PostProcessor:
             clim=np.array(clim) * config["conversionfactor"],  # Apply unit conversion
         )
 
-        # Annotate time
+        # Annotate activation level
         #plotter.add_text(
         #    f"Activation level: {activation_level:.2f}",
         #    position="top",
