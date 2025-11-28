@@ -134,6 +134,7 @@ rule plotGrowthComparison:
             mesh=MESHES.keys(),
             protocol=PROTOCOLS,
         ),
+        script= SCRIPT_DIR / "plot_growth_comparison.py",
     output:
         PAPER_FIG_DIR / "{mesh}" / "growth_comparison.png",
     params:
@@ -142,7 +143,7 @@ rule plotGrowthComparison:
         "musclex"
     shell:
         """
-        python {SCRIPT_DIR}/plot_growth_comparison.py \
+        python {input.script} \
             {input} \
             --protocols {params.protocols} \
             --output-file {output}
