@@ -8,7 +8,7 @@ ROOT_DIR = Path(workflow.basedir).parent
 RESULTS_DIR = ROOT_DIR / "results"
 CONFIG_DIR = ROOT_DIR / "config_files"
 SCRIPT_DIR = Path("__file__").parent
-PAPER_FIG_DIR = RESULTS_DIR / "paperfigures"
+PAPER_FIG_DIR = RESULTS_DIR / "figure3"
 
 PROTOCOLS = ["defreitas", "weekly", "everythreedays"]
 
@@ -22,7 +22,7 @@ rule all:
 rule runThreeProtocols:
     output:
         expand(
-            RESULTS_DIR / "paper/figure3/{protocol}/ode_results.csv",
+            RESULTS_DIR / "figure3/figure3abcd/{protocol}/ode_results.csv",
             protocol=PROTOCOLS,
         ),
     input:
@@ -39,7 +39,7 @@ rule runThreeProtocols:
 rule runMyofibrilComparison:
     output:
         expand(
-            RESULTS_DIR / "paper/figure3e/{protocol}/ode_results.csv",
+            RESULTS_DIR / "figure3/figure3e/{protocol}/ode_results.csv",
             protocol=PROTOCOLS,
         ),
     input:
