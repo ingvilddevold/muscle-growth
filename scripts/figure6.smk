@@ -264,7 +264,7 @@ rule aggregateODEStates:
             protocol="{protocol}",
             variation=VARIATIONS.keys(),
         ),
-        script=SCRIPT_DIR / "plot_spatial_ode_states2.py",
+        script=SCRIPT_DIR / "plot_spatial_ode_states.py",
     params:
         # Pass the variation names and paths to the script
         variation_labels=",".join(VARIATIONS.keys()),
@@ -274,7 +274,7 @@ rule aggregateODEStates:
     conda:
         "musclex"
     resources:
-        time="01:00:00",
+        time="03:00:00",
     shell:
         """
         python {input.script} aggregate \
@@ -291,7 +291,7 @@ rule plotODEStates:
     input:
         # Depends on the CSV from the aggregation step
         csv=rules.aggregateODEStates.output.csv,
-        script=SCRIPT_DIR / "plot_spatial_ode_states2.py",
+        script=SCRIPT_DIR / "plot_spatial_ode_states.py",
     wildcard_constraints:
         protocol="|".join(PROTOCOLS),
     conda:
