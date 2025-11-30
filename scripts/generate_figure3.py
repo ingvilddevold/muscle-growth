@@ -150,6 +150,7 @@ for protocol in plot_order:
     ax.plot(df.t / (24 * 7), df.z, label=legend_names.get(protocol, protocol))
 ax.set_ylabel(r"Myofibrils $N$")
 ax.set_ylim(1.0, 1.1)
+ax.set_xticks([0, 3, 6, 9])
 
 # --- Plot 6: Sensitivity Analysis ---
 # Call function to draw on the last subplot
