@@ -276,7 +276,7 @@ def main(
                 output_path = sim_dir.parent / (sim_dir.stem + "_postprocessed") / f"{qty}_final_plot.png"
 
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                plotter.screenshot(output_path)
+                plotter.screenshot(output_path, scale=3)
                 plotter.close()
                 print(f"    Saved: {output_path}")
 
