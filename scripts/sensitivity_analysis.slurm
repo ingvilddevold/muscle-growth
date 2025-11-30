@@ -7,7 +7,7 @@
 #SBATCH --ntasks=1                          # Run a single task
 #SBATCH --cpus-per-task=64                  # Number of CPUs allocated to this task (for mp.Pool)
 #SBATCH --mem=1M                            # Total memory for the job
-#SBATCH --time=6:30:00                      # Wall time limit (HH:MM:SS)
+#SBATCH --time=12:00:00                     # Wall time limit (HH:MM:SS)
 #SBATCH --partition=defq,milanq,fpgaq       # Partitions to run the job on
 
 
