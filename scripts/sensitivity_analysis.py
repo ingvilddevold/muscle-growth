@@ -24,7 +24,7 @@ plt.rcParams["text.usetex"] = False
 
 # Prepare the baseline exercise model
 protocol = RegularExercise(15, 1, 23, 20 * 24)
-exercise_config = Path(__file__).parents[1] / "config_files/exercise_eq.yml"
+exercise_config = Path(__file__).parents[1] / "config_files/exercise_eq_reduced_k1.yml"
 # load parameter values from yml
 with open(exercise_config, "r") as f:
     p = yaml.safe_load(f)["exercise_parameters"]
