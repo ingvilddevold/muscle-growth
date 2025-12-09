@@ -58,14 +58,14 @@ If running locally, specify to use Conda and set the number of cores
 ```bash
 snakemake -s scripts/figureX.smk --use-conda --cores 4
 ```
-Note that figure5.smk and figure6.smk are configured to run on ex3. To run those locally, in particular the plot scripts, you may need to remove the xvfb-run commands.
+Note that `figure5.smk` and `figure6.smk` are configured to run on eX3. To run those locally, in particular the plot scripts, you may need to remove the `xvfb-run` commands.
 
 ## Demo scripts
 In addition to the Snakefiles, there are a selection of standalone demo scripts available in `demos/`. 
 
 
 ## Geometries
-The realistic muscle geometries used in this study were derived from the [Visible Human Dataset](https://digitalcommons.du.edu/visiblehuman/). The processed meshes and fiber fields required to run figure5.smk are available in the meshes/ directory and include
+The realistic muscle geometries used in this study were derived from the [Visible Human Dataset](https://digitalcommons.du.edu/visiblehuman/). The processed meshes and fiber fields required to run figure5.smk are available in the `meshes/` directory and include
 * Biceps Femoris Long Head
 * Semitendinosus
 * Tibialis Anterior
