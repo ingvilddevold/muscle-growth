@@ -35,7 +35,7 @@ class MuscleRohrle:
         conf_file: str,
         fibers,
         output_dir: Path = tmpdir,
-        clamp_type: str = "full",  # "full" or "z"
+        clamp_type: str = "full",  # "full", "z", "robin" or "none"
         pin_endpoint: bool = False, # whether to pin a point at one endpoint when using robin BCs
     ):
         self.domain = domain
