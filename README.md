@@ -42,30 +42,30 @@ conda activate snakemake_env
 ### Reproducing results
 Run the specific Snakefile for the desired figure. Snakemake will automatically handle the activation of the `musclex` environment for the computational rules. 
 
-| Snakefile | Description | Corresponding Figures |
+| Snakefile | Description | Corresponding Figure |
 | :--- | :--- | :--- |
-| `figure3.smk` | **Signaling Dynamics (ODE only)**<br>Simulates the time evolution of IGF1, AKT, FOXO, and mTOR under three exercise protocols (MWF, Weekly, Every-3-days). | Figure 3 |
-| `figure4.smk` | **Muscle Growth in Idealized Geometry**<br>Runs the full coupled model on an idealized fusiform geometry. Outputs include time-courses for Cross-Sectional Area (CSA), Volume, and the feedback-regulated protein synthesis rate $k_M$. | Figure 4 |
-| `figure5.smk` | **Realistic Geometries**<br>Simulates growth across 12 anatomically realistic meshes (Biceps Femoris, Semitendinosus, Tibialis Anterior) derived from the Visible Human Dataset. | Figures 5 & 6 |
-| `figure6.smk` | **Signaling Heterogeneity**<br>Runs an ensemble simulation with spatially perturbed signaling parameters (IGF1, AKT, FOXO, mTOR) to assess the impact of local biological variability on macroscopic tissue deformation. Uses the female left BFLH geometry and the MWF protocol. | Figure 7 |
+| `Snakefile_signaling.smk` | **Signaling Dynamics (ODE only)**<br>Simulates the time evolution of IGF1, AKT, FOXO, and mTOR under three exercise protocols (MWF, Weekly, Every-3-days). | Figure 3 |
+| `Snakefile_idealized.smk` | **Muscle Growth in Idealized Geometry**<br>Runs the full coupled model on an idealized fusiform geometry. Outputs include time-courses for Cross-Sectional Area (CSA), Volume, and the feedback-regulated protein synthesis rate $k_M$. | Figure 4 |
+| `Snakefile_realistic.smk` | **Realistic Geometries**<br>Simulates growth across 12 anatomically realistic meshes (Biceps Femoris, Semitendinosus, Tibialis Anterior) derived from the Visible Human Dataset. | Figure 6 |
+| `Snakefile_heterogeneity.smk` | **Signaling Heterogeneity**<br>Runs an ensemble simulation with spatially perturbed signaling parameters (IGF1, AKT, FOXO, mTOR) to assess the impact of local biological variability on macroscopic tissue deformation. Uses the female left BFLH geometry and the MWF protocol. | Figure 7 |
 
-#### Running on a cluster
+#### Running the Snakefiles
 To run on a cluster using the slurm executor (or similar), use the provided profile:
 ```bash
-snakemake -s scripts/figureX.smk --profile scripts/ex3
+snakemake -s scripts/Snakefile_XXX.smk --profile scripts/ex3
 ```
 If running locally, specify to use Conda and set the number of cores
 ```bash
-snakemake -s scripts/figureX.smk --use-conda --cores 4
+snakemake -s scripts/Snakefile_XXX.smk --use-conda --cores 4
 ```
-Note that `figure5.smk` and `figure6.smk` are configured to run on eX3. To run those locally, in particular the plot scripts, you may need to remove the `xvfb-run` commands.
+Note that `Snakefile_realistic.smk` and `Snakefile_heterogeneity.smk` intend to be run on eX3 due to long runtimes. To run those locally, in particular the plot scripts, you may need to remove the `xvfb-run` commands.
 
 ## Demo scripts
-In addition to the Snakefiles, there are a selection of standalone demo scripts available in `demos/`. 
+In addition to the Snakefiles, there are a selection of standalone demo scripts available in `demos/`, all feasible for testing on a standard laptop:
+* `demo_signaling.py` – Signaling model simulation for an example exercise protocol.
+* `demo_muscle_contraction.py` – Simulating muscle contraction in an idealized fusiform muscle geometry.
+* `demo_coupled.py` – Simulating the coupled signaling-mechanics model in an idealized fusiform muscle geometry.
 
 
 ## Geometries
-The realistic muscle geometries used in this study were derived from the [Visible Human Dataset](https://digitalcommons.du.edu/visiblehuman/). The processed meshes and fiber fields required to run figure5.smk are available in the `meshes/` directory and include
-* Biceps Femoris Long Head
-* Semitendinosus
-* Tibialis Anterior
+The realistic muscle geometries used in this study were derived from the [Visible Human Dataset](https://digitalcommons.du.edu/visiblehuman/). The processed meshes and fiber fields required to run `Snakefile_realistic.smk` are available in the `meshes/` directory. These include the Biceps Femoris Long Head, Semitendinosus and Tibialis Anterior leg muscles, with four instances of each (male and female, left and right).
