@@ -14,8 +14,8 @@ from matplotlib import rc
 
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
-plt.rcParams["font.size"] = 8
-plt.rcParams["svg.fonttype"] = "none" # make text editable in Inkscape
+plt.rcParams["font.size"] = 7
+plt.rcParams["svg.fonttype"] = "none"  # make text editable in Inkscape
 rc("text", usetex=False)
 # --- End Styling ---
 
@@ -30,6 +30,7 @@ def load_growth_data(csv_files: list[str], labels: list[str]) -> pd.DataFrame:
             # Normalize to initial value
             df["csa_norm"] = df["csa"] / df["csa"].iloc[0]
             df["volume_norm"] = df["volume"] / df["volume"].iloc[0]
+            df["k1"] = df["k1"]
             df["Time (weeks)"] = df["t"] / (24 * 7)
             all_dfs.append(df)
         except Exception as e:
@@ -54,7 +55,7 @@ def main(
 ):
     """
     Loads growth CSVs and plots:
-    1. Baseline (Red line)
+    1. Baseline (Dashed blue line)
     2. Ensemble of Variations (Mean +/- Std, and Range)
     """
     csv_files = input_csvs.split(",")
@@ -83,87 +84,92 @@ def main(
         raise typer.Exit(code=1)
 
     # --- 3. Calculate Ensemble Statistics ---
-    # Group by Time and calculate Mean, Std, Min, Max across the variations
     print("Calculating ensemble statistics...")
-    ensemble_stats = (
-        variations_df.groupby("Time (weeks)")
-        .agg(
-            csa_mean=("csa_norm", "mean"),
-            csa_std=("csa_norm", "std"),
-            csa_min=("csa_norm", "min"),
-            csa_max=("csa_norm", "max"),
-            vol_mean=("volume_norm", "mean"),
-            vol_std=("volume_norm", "std"),
-            vol_min=("volume_norm", "min"),
-            vol_max=("volume_norm", "max"),
-        )
-        .reset_index()
-    )
+
+    # We define a dictionary to map the columns we want to aggregate
+    # to the new prefix names in the stats dataframe
+    agg_dict = {
+        "csa_norm": ["mean", "std", "min", "max"],
+        "volume_norm": ["mean", "std", "min", "max"],
+        "k1": ["mean", "std", "min", "max"],
+    }
+
+    # Perform aggregation
+    ensemble_stats = variations_df.groupby("Time (weeks)").agg(agg_dict)
+
+    # Flatten MultiIndex columns (e.g., ('csa_norm', 'mean') -> 'csa_norm_mean')
+    ensemble_stats.columns = [
+        "_".join(col).strip() for col in ensemble_stats.columns.values
+    ]
+    ensemble_stats = ensemble_stats.reset_index()
 
     # --- 4. Plotting ---
     print(f"Generating plot...")
-    fig, axes = plt.subplots(1, 2, figsize=(5, 1.8))
+    fig, axes = plt.subplots(1, 3, figsize=(5, 1.5))
 
     # Define plot settings
     baseline_color = "#1b699c"  # DeFreitas blue
     ensemble_color = "#333333"  # Dark Grey/Black
-    metrics = [
-        (axes[0], "csa", "Normalized CSA"),
-        (axes[1], "vol", "Normalized Volume"),
+
+    # Configuration list: (Axis, Stat_Column_Prefix, DataFrame_Column, Y_Label)
+    plot_configs = [
+        (axes[0], "csa_norm", "csa_norm", "Normalized CSA"),
+        (axes[1], "volume_norm", "volume_norm", "Normalized Volume"),
+        (axes[2], "k1", "k1", "$k_M$"),
     ]
 
     legend_elements = []
 
-    for i, (ax, prefix, ylabel) in enumerate(metrics):
+    for i, (ax, prefix, df_col, ylabel) in enumerate(plot_configs):
         t = ensemble_stats["Time (weeks)"]
+
+        # Construct column names for stats
         mean_col = f"{prefix}_mean"
         std_col = f"{prefix}_std"
         min_col = f"{prefix}_min"
         max_col = f"{prefix}_max"
 
-        # Identify the raw column name in baseline_df (csa_norm or volume_norm)
-        raw_col = "csa_norm" if prefix == "csa" else "volume_norm"
-
         # --- Plot Ensemble ---
-        # 1. Mean Line
-        ax.plot(t, ensemble_stats[mean_col], color=ensemble_color, lw=1.5, zorder=3)
+        if mean_col in ensemble_stats.columns:
+            # 1. Mean Line
+            ax.plot(t, ensemble_stats[mean_col], color=ensemble_color, lw=1.5, zorder=3)
 
-        # 2. Std Dev Shading
-        ax.fill_between(
-            t,
-            ensemble_stats[mean_col] - ensemble_stats[std_col],
-            ensemble_stats[mean_col] + ensemble_stats[std_col],
-            color=ensemble_color,
-            alpha=0.3,
-            zorder=2,
-            lw=0,
-        )
+            # 2. Std Dev Shading
+            ax.fill_between(
+                t,
+                ensemble_stats[mean_col] - ensemble_stats[std_col],
+                ensemble_stats[mean_col] + ensemble_stats[std_col],
+                color=ensemble_color,
+                alpha=0.3,
+                zorder=2,
+                lw=0,
+            )
 
-        # 3. Min/Max Range (Dashed Lines)
-        ax.plot(
-            t,
-            ensemble_stats[min_col],
-            color=ensemble_color,
-            ls="--",
-            lw=0.8,
-            alpha=0.5,
-            zorder=2,
-        )
-        ax.plot(
-            t,
-            ensemble_stats[max_col],
-            color=ensemble_color,
-            ls="--",
-            lw=0.8,
-            alpha=0.5,
-            zorder=2,
-        )
+            # 3. Min/Max Range (Dashed Lines)
+            ax.plot(
+                t,
+                ensemble_stats[min_col],
+                color=ensemble_color,
+                ls="--",
+                lw=0.8,
+                alpha=0.5,
+                zorder=2,
+            )
+            ax.plot(
+                t,
+                ensemble_stats[max_col],
+                color=ensemble_color,
+                ls="--",
+                lw=0.8,
+                alpha=0.5,
+                zorder=2,
+            )
 
         # --- Plot Baseline ---
-        if not baseline_df.empty:
+        if not baseline_df.empty and df_col in baseline_df.columns:
             ax.plot(
                 baseline_df["Time (weeks)"],
-                baseline_df[raw_col],
+                baseline_df[df_col],
                 color=baseline_color,
                 lw=1.5,
                 ls="--",
@@ -180,38 +186,9 @@ def main(
         ax.set_xticks([0, 3, 6, 9])
         ax.set_xlim(left=0)
 
-        # Create custom legend handles (once)
-        if i == 0:
-            from matplotlib.lines import Line2D
-            from matplotlib.patches import Patch
-
-            legend_elements = [
-                Line2D([0], [0], color=baseline_color, lw=1.5, ls="--", label="Uniform"),
-                Line2D([0], [0], color=ensemble_color, lw=1.5, label="Ensemble Mean"),
-                Patch(facecolor=ensemble_color, alpha=0.3, label="Ensemble Std Dev"),
-                Line2D(
-                    [0],
-                    [0],
-                    color=ensemble_color,
-                    ls="--",
-                    lw=0.8,
-                    alpha=0.5,
-                    label="Ensemble Range",
-                ),
-            ]
-
-    # Add global legend
-    fig.legend(
-        handles=legend_elements,
-        loc="center left",
-        bbox_to_anchor=(1.0, 0.5),
-        fontsize=8,
-        title_fontsize=8,
-        frameon=False,
-    )
-
     # Adjust layout
-    plt.tight_layout(rect=[0, 0, 0.95, 1])
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.4)
 
     # Save
     output_file.parent.mkdir(parents=True, exist_ok=True)
