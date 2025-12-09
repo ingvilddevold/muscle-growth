@@ -7,6 +7,7 @@ Download from: https://digitalcommons.du.edu/visiblehuman/1/ (Final 3D STL Model
 
 import pyvista as pv
 import os
+from pathlib import Path
 
 
 def visualize_anatomy(root_directory, custom_highlights=None):
@@ -88,8 +89,9 @@ def visualize_anatomy(root_directory, custom_highlights=None):
     print(f"Total parts loaded: {loaded_count}")
 
     # Define output filenames
-    front_filename = "view_front.png"
-    back_filename = "view_back.png"
+    output_dir = Path(__file__).parents[1] / "results" / "geometries"
+    front_filename = output_dir / "view_front.png"
+    back_filename = output_dir / "view_back.png"
 
     # --- A. Generate Front View ---
     print("Generating Front View...")
