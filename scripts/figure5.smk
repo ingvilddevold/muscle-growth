@@ -184,6 +184,7 @@ rule plotGrowthComparison:
             mesh="{mesh}",
             protocol=PROTOCOLS,
         ),
+        script=f"{SCRIPT_DIR}/plot_growth_comparison.py",
     output:
         PAPER_FIG_DIR / "{mesh}" / "growth_comparison.png",
     params:
@@ -194,7 +195,7 @@ rule plotGrowthComparison:
         time="00:05:00",
     shell:
         """
-        python {SCRIPT_DIR}/plot_growth_comparison.py \
+        python {input.script} \
             {input} \
             --protocols {params.protocols} \
             --output-file {output}
