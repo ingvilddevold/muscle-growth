@@ -8,6 +8,7 @@ from mpi4py import MPI
 from matplotlib import pyplot as plt
 import imageio
 import typer
+from typing import Annotated
 
 from musclex.material import MuscleRohrle
 from musclex.utils import get_interpolation_points
@@ -366,7 +367,7 @@ class PostProcessor:
         # --- 3. Create media files ---
         self._create_media_files()
 
-        print("\nPost-processing complete.")
+        print(f"\nPost-processing complete. Videos and plots saved to: {self.postprocessed_dir}")
 
 
 app = typer.Typer()
@@ -390,11 +391,7 @@ def postprocess_from_file(
         dir_okay=False,
         resolve_path=True,
     ),
-    freq: int = typer.Option(
-        1,
-        "--freq",
-        help="Frequency of data saving in the simulation (default: 1).",
-    ),
+    freq: Annotated[int, typer.Option("--freq", help="Frequency...")] = 1,
 ):
     processor = PostProcessor(output_dir, conf_file, freq)
     processor.run()
