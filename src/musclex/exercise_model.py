@@ -217,11 +217,11 @@ class ExerciseModel:
         t = np.array([])
         y = []
         for event in self.protocol.events:
-            t = np.append(t, event.solution.t)
+            t = np.append(t, event.solution["t"])
             if len(y) == 0:  # first event
-                y = event.solution.y
+                y = event.solution["y"]
             else:
-                y = np.hstack((y, event.solution.y))
+                y = np.hstack((y, event.solution["y"]))
             pass
         self.t = t
         self.y = y
@@ -266,7 +266,7 @@ class ExerciseModel:
             -1, 1
         )  # Reshape to (n_steps, 1)
 
-        solution_dict = {"t": event_times, "f_rate": f_rate_history}
+        solution_dict = {"t": event_times, "f_rate": f_rate_history, "y": solution.y}
         return solution_dict
 
     def set_feedback(self, k1_function: dolfinx.fem.Function):
