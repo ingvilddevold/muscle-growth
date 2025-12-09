@@ -16,7 +16,7 @@ import scienceplots
 plt.style.use("science")
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
-plt.rcParams["font.size"] = 8
+plt.rcParams["font.size"] = 7
 plt.rcParams["text.usetex"] = False
 plt.rcParams['svg.fonttype'] = 'none' # makes text editable in Inkscape
 # --- End Styling ---
@@ -180,7 +180,7 @@ def plot_data(
 
     # --- 3. Plotting Setup ---
     print(f"Generating plot...")
-    fig, axes = plt.subplots(2, 3, figsize=(6, 3.5))
+    fig, axes = plt.subplots(2, 3, figsize=(5, 3))
     axes_flat = axes.flatten()
 
     plot_map = {
@@ -254,7 +254,7 @@ def plot_data(
             )
 
         # --- C. Styling ---
-        ax.set_title(plot_titles.get(state_name, state_name))
+        ax.set_title(plot_titles.get(state_name, state_name), fontsize=7)
         
         # Thresholds
         #if state_name == "mtor":
