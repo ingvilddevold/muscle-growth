@@ -1,8 +1,10 @@
-# Simulations and postprocessing for Figure 5
-#   contraction and growth simulations on realistic meshes
+# Simulations and postprocessing for Figure 6 in the paper:
+#   Contraction and growth simulations in realistic geometries
+#
+# Expect long runtimes; recommended to run on a compute cluster.
 #
 # Run the Snakefile as:
-#   $ snakemake -s scripts/figure5.smk --profile scripts/ex3
+#   $ snakemake -s scripts/Snakefile_realistic.smk --profile scripts/ex3
 
 
 from pathlib import Path

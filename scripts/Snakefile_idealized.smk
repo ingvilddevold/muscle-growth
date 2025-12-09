@@ -1,8 +1,8 @@
-# Simulations and postprocessing for Figure 4
-#   contraction and growth simulations in idealized fusiform geometry
+# Simulations and postprocessing for Figure 4 in the paper:
+#   Contraction and growth simulations in idealized fusiform geometry
 #
-# Run script as e.g.:
-#   $ snakemake -s scripts/figure4.smk --cores 4 --use-conda
+# Run script as:
+#   $ snakemake -s scripts/Snakefile_idealized.smk --use-conda --cores 4
 
 from pathlib import Path
 

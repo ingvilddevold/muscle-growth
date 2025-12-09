@@ -1,10 +1,10 @@
+# Simulations and postprocessing for Figure 6 in the paper:
+#   Coupled growth simulations with heterogeneity in signaling parameters
 #
-# Simulations and postprocessing for Figure 6
-#   coupled growth simulations with spatially varying ODEs
+# Expect long runtimes; recommended to run on a compute cluster.
 #
 # Run as
-#   $ snakemake -s scripts/figure6.smk --profile scripts/ex3
-#
+#   $ snakemake -s scripts/Snakefile_heterogeneity.smk --profile scripts/ex3
 
 from pathlib import Path
 import json
@@ -92,10 +92,12 @@ rule runSpatialGrowthSimulation:
         / "{mesh}"
         / "growth_sim_{protocol}_{variation}"
         / "growth_results.csv",
-        ode_history_bp=directory(PAPER_FIG_DIR
-        / "{mesh}"
-        / "growth_sim_{protocol}_{variation}"
-        / "ode_spatial_history.bp"),
+        ode_history_bp=directory(
+            PAPER_FIG_DIR
+            / "{mesh}"
+            / "growth_sim_{protocol}_{variation}"
+            / "ode_spatial_history.bp"
+        ),
         spatial_params_csv=PAPER_FIG_DIR
         / "{mesh}"
         / "growth_sim_{protocol}_{variation}"
@@ -235,7 +237,7 @@ rule plot3DGrid:
             ["baseline"] + sorted([v for v in VARIATIONS if v != "baseline"])
         ),
         input_dirs=lambda wildcards, input: ",".join(input.sim_dirs),
-        ode_bp_filename="ode_spatial_history.bp", # Relative name within sim_dir
+        ode_bp_filename="ode_spatial_history.bp",  # Relative name within sim_dir
     wildcard_constraints:
         protocol="|".join(PROTOCOLS),
     conda:
@@ -252,6 +254,7 @@ rule plot3DGrid:
             --warp-scale {POSTPROCESS_WARP_SCALE} \
             --save-individual
         """
+
 
 rule aggregateODEStates:
     output:
@@ -282,6 +285,7 @@ rule aggregateODEStates:
             --variation-labels {params.variation_labels} \
             --output-csv {output.csv}
         """
+
 
 rule plotODEStates:
     localrule: True
