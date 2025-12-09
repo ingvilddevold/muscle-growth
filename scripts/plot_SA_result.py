@@ -110,7 +110,7 @@ def plot_sa_scatter(ax, sa_results_csv):
         groups = list(param_to_groups.get(name, set()))
         #x, y = filtered_indices[i], filtered_confidences[i]
         x, y = filtered_indices[i], filtered_sd[i]
-        s = 50  # marker size
+        s = 30  # marker size
         if len(groups) == 2:
             # Plot two-colored markers for shared parameters (coupling strengths)
             ax.scatter(
@@ -164,7 +164,7 @@ def plot_sa_scatter(ax, sa_results_csv):
                 (x, y),
                 textcoords="offset points",
                 xytext=offsets[i % len(offsets)],
-                fontsize=11,
+                fontsize=8,
                 usetex=True,
             )
 
@@ -189,9 +189,13 @@ def plot_sa_scatter(ax, sa_results_csv):
         frameon=False,
         loc="lower right",
         bbox_to_anchor=(1.05, 0),
-        fontsize=9,
-        labelspacing=0.2,
+        fontsize=8,
+        labelspacing=0.3,
         handletextpad=0.05,
     )
     ax.set_xlabel(r"$\mu$ (Mean Total-Order Index)")
     ax.set_ylabel(r"$\sigma$ (Std. Dev.)")
+
+    # increase ylim slightly to make room for the top markers
+    y_min, y_max = ax.get_ylim()
+    ax.set_ylim(y_min, y_max * 1.1)
