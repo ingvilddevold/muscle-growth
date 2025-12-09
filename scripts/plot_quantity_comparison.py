@@ -13,6 +13,7 @@ from matplotlib import rc
 
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
+plt.rcParams["font.size"] = 7
 plt.rcParams["svg.fonttype"] = "none"
 rc("text", usetex=False)
 
@@ -42,9 +43,9 @@ def get_protocol_and_geometry(path, protocols, geometries):
 def get_subject_group(geometry_name):
     """Determine the subject group from the geometry name."""
     if "VHF" in geometry_name:
-        group = "Female"  # Simplified
+        group = "Female"
     elif "VHM" in geometry_name:
-        group = "Male"  # Simplified
+        group = "Male"
     else:
         # Default case if no specific group is identified
         return "Unknown"
@@ -187,7 +188,7 @@ def main(
         data=df_plot,
         col="protocol",
         col_order=protocol_order,
-        height=2.2,
+        height=2.0,
         aspect=0.7,
         sharey=False,
     )
@@ -278,13 +279,13 @@ def main(
     g.fig.suptitle(
         f"Final Normalized {quantity_label} by Protocol and Muscle Type",
         y=0.9,
-        fontsize=10,
+        fontsize=8,
     )
 
     # Set axis labels for the entire figure
-    g.set_axis_labels(x_var="", y_var=f"Normalized {quantity_label}", fontsize=8)
+    g.set_axis_labels(x_var="", y_var=f"Normalized {quantity_label}")
 
-    # Set titles for each subplot using descriptive labels
+    # Set titles for each subplot
     protocol_labels = {
         "defreitas": "MWF",
         "weekly": "Weekly",
@@ -292,16 +293,16 @@ def main(
         "testing": "Testing",
     }
     for ax, title in zip(g.axes.flat, g.col_names):
-        ax.set_title(protocol_labels.get(title, title), size=8)
+        ax.set_title(protocol_labels.get(title, title), size=7)
 
-    g.set_yticklabels(fontsize=8)
+    # g.set_yticklabels(fontsize=8)
 
     # Rotate x-axis labels
-    g.set_xticklabels(rotation=45, ha="right", fontsize=8)
+    g.set_xticklabels(rotation=45, ha="right")
 
     g.despine()
 
-    # --- ADDED: Create a custom legend ---
+    # ---  Create a custom legend ---
     legend_elements = [
         # Title for "Female"
         Line2D([0], [0], marker=None, color="none", label="Female", linestyle="None"),
@@ -362,7 +363,6 @@ def main(
         handles=legend_elements,
         loc="center left",
         bbox_to_anchor=(1.0, 0.5),  # Positioned to the right
-        fontsize=8,
         frameon=False,
     )
 
