@@ -1,6 +1,6 @@
 """
 Visualize the 3D muscle geometries with tissue-specific coloring and custom highlights.
-Assumes STL files are downloaded and stores in root_directory.
+Assumes STL files are downloaded and stored in root_directory.
 Will load and visualize all STL files found in the directory and its subdirectories.
 Download from: https://digitalcommons.du.edu/visiblehuman/1/ (Final 3D STL Models)
 """
