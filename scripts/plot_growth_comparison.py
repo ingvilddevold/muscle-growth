@@ -12,7 +12,7 @@ from matplotlib import rc
 
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
-plt.rcParams["font.size"] = 8
+plt.rcParams["font.size"] = 7
 plt.rcParams['svg.fonttype'] = 'none'
 
 rc("text", usetex=False)
