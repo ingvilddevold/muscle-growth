@@ -18,7 +18,7 @@ pyvista.global_theme.font.family = "arial"
 from matplotlib import rc
 
 plt.rcParams["font.family"] = "sans-serif"
-plt.rcParams["font.sans-serif"] = ["CMU Sans Serif"]
+plt.rcParams["font.sans-serif"] = ["Arial"]
 rc("text", usetex=False)
 
 CAMERA_POS = {

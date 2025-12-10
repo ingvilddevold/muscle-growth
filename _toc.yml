@@ -1,0 +1,6 @@
+format: jb-book
+root: README
+parts:
+  - caption: Demo
+    chapters:
+    - file: "demos/demo_signaling_model.py"

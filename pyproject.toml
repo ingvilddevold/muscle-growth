@@ -27,3 +27,9 @@ dependencies = [
     "imageio-ffmpeg",
     "meshio"
 ]
+
+[project.optional-dependencies]
+docs = [
+    "jupyter-book<2.0",
+    "jupytext",
+]

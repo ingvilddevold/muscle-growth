@@ -1,4 +1,4 @@
-name: musclex
+name: muscle-growth
 channels:
   - defaults
   - conda-forge
