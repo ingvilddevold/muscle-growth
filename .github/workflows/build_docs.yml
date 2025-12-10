@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install ".[docs]"
-          apt install msttcorefonts -qq
+          apt install -y msttcorefonts -qq
 
       - name: Build docs
         run: jupyter book build -W .
