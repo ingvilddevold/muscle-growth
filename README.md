@@ -79,9 +79,9 @@ Note: `Snakefile_realistic.smk` and `Snakefile_heterogeneity.smk` are intended f
 
 ### Demo scripts
 Standalone demo scripts in `demos/` can be run on a standard laptop:
-- `demo_signaling.py`: Signaling model simulation for an example exercise protocol
+- `demo_signaling_model.py`: Signaling model simulation for an example exercise protocol
 - `demo_muscle_contraction.py`: Muscle contraction in an idealized fusiform geometry
-- `demo_coupled.py`: Coupled signaling-mechanics model in an idealized fusiform geometry
+- `demo_coupled_model.py`: Coupled signaling-mechanics model in an idealized fusiform geometry
 
 
 
