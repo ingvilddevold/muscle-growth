@@ -15,6 +15,7 @@ pv.set_jupyter_backend("static")
 # %%
 base_path = Path("..") / "data" / "VHF_surfaces"
 output_file = Path("..") / "results" / "geometries" / "anatomy_view.png"
+output_file.parent.mkdir(parents=True, exist_ok=True)
 
 
 # %% [markdown]
