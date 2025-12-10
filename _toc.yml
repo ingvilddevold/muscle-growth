@@ -1,6 +1,7 @@
 format: jb-book
 root: README
 parts:
-  - caption: Demo
+  - caption: Demos
     chapters:
     - file: "demos/demo_signaling_model.py"
+    - file: "demos/demo_muscle_contraction.py"
