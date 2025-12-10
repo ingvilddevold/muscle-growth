@@ -31,6 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install ".[docs]"
+          echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | sudo debconf-set-selections
           apt install -y msttcorefonts -qq
 
       - name: Build docs
