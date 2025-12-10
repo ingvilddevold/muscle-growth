@@ -5,3 +5,6 @@ parts:
     chapters:
     - file: "demos/demo_signaling_model.py"
     - file: "demos/demo_muscle_contraction.py"
+  - caption: Realistic geometries
+    chapters:
+    - file: "scripts/anatomy_view.py"
