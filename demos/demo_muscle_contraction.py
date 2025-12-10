@@ -1,12 +1,23 @@
-"""
-Demo Script: 3D Muscle Contraction Simulation using Hyperelastic Material Model
-"""
+# %% [markdown]
+# # Simulation of muscle contraction with a hyperelastic material model
+# 
+# This demo simulates the active contraction of an idealized skeletal muscle.
+# 
+# We use a **Transversely Isotropic Hyperelastic** framework to capture the complex material behavior of muscle tissue:
+# 1.  **Passive Elasticity:** The passive resistance of the tissue to deformation.
+# 2.  **Active Contraction:** The force generated along muscle fibers when stimulated ($\alpha > 0$).
+# 3.  **Incompressibility:** Muscle volume remains constant during contraction ($J=1$).
+# 
+# In this demo, we will load an idealized muscle geometry, apply tendon-like boundary conditions, and simulate a contraction.
 
+# %% 
 from pathlib import Path
 import numpy as np
 import dolfinx
+import pyvista as pv
+pv.set_jupyter_backend("static")
 
-import musclex
+from musclex.geometry import IdealizedFusiform
 from musclex.material import MuscleRohrle
 from musclex.postprocess_mechanics import postprocess_from_file
 
@@ -14,61 +25,75 @@ from musclex.postprocess_mechanics import postprocess_from_file
 # Set to INFO or DEBUG for more detailed logs
 dolfinx.log.set_log_level(dolfinx.log.LogLevel.WARNING)
 
-# 1. Setup
-# Define paths relative to the script location
-root_dir = Path(__file__).parents[1]
+# %% 
+root_dir = Path("..")
 config_path = root_dir / "config_files/material_rohrle.yml"
 mesh_path = root_dir / "meshes/muscle-idealized/muscle-idealized.xdmf"
 results_dir = root_dir / "results/demos/contraction_demo"
+results_dir.mkdir(parents=True, exist_ok=True) # ensure it exists
 
-# Create output directory
-results_dir.mkdir(parents=True, exist_ok=True)
+# %% [markdown]
+# ## Load geometry and fiber architecture
+# 
+# Muscle tissue is highly anisotropic, meaning its mechanical properties depend on direction. 
+# The **fiber field** ($a_0$) defines the local orientation of muscle bundles. During contraction, active force is generated exclusively along these fibers.
+# 
+# Here, we load an idealized fusiform mesh where fibers follow the curvature of the muscle.
 
-print(f"\n{'='*60}")
-print(f"{'3D MUSCLE CONTRACTION SIMULATION':^60}")
-print(f"{'='*60}")
-
-# 2. Load Geometry
+# %%
 print(f"Loading mesh from: {mesh_path.name}...")
-
-# The Geometry class handles mesh loading and fiber field initialization
-geometry = musclex.geometry.IdealizedFusiform(mesh_path)
+geometry = IdealizedFusiform(mesh_path)
 geometry.info()
 
-# 3. Initialize Material Model
-# We use the transversely isotropic hyperelastic model
-print(f"Initializing material model from: {config_path.name}...")
+# %% [markdown]
+# We can visualize the geometry, tagged boundary for boundary conditions, and fiber architecture:
+# %%
+geometry.plot(mode="all")
 
+# %% [markdown]
+# ## Initialize material and boundary conditions
+# 
+# We apply **Robin boundary conditions** at the muscle ends (insertion and origin). 
+# Instead of fixing the ends rigidly, this models the **tendons** as elastic springs. This allows the muscle to shorten realistically against a load, rather than just bulging in place.
+
+# %%
 material_model = MuscleRohrle(
-    geometry.domain,  # the mesh
-    geometry.ft,  # facet tags marking boundaries for BCs
-    config_path,  # material configuration file
-    geometry.fibers,  # fiber orientation field
-    results_dir,  # output directory
-    clamp_type="robin",  # spring-like boundary condition at the ends
+    geometry.domain,  # The computational mesh
+    geometry.ft,      # Facet tags marking boundaries
+    config_path,      # Material parameters (stiffness, active force scale)
+    geometry.fibers,  # Fiber orientation field
+    results_dir,      # Output directory
+    clamp_type="robin", # Spring-like tendon boundaries
 )
 
-# 4. Run Simulation
-# Ramp activation level (alpha) from 0.0 (passive) to 1.0 (fully active)
+# %% [markdown]
+# ## Run the simulation
+# We simulate the contraction by ramping the activation parameter $\alpha$ from **0.0 (Passive)** to **1.0 (Fully Active)**. 
+# 
+# The solver performs a **quasi-static** simulation, meaning it solves for static equilibrium at every step. This captures the sequence of deformed shapes as the muscle contracts.
+
+# %% tags=["output_scroll"]
 steps = 21
 alphas = np.linspace(0, 1.0, steps)
 np.save(results_dir / "activation_levels.npy", alphas)  # needed for postprocessing
 
-print(f"Starting quasi-static solve for {steps} steps (alpha 0.0 -> 1.0)...")
-
 # The solver handles the nonlinear Newton iterations for each load step
-converged, _ = material_model.solve(alphas)
+material_model.solve(alphas)
 
-print(f"Simulation {'converged' if converged else 'failed'}.")
+# %% [markdown]
+# ## Post-processing and visualization
+# 
+# We generate 3D visualizations of the results. Key metrics to observe include:
+# * **Displacement:** How much the muscle ends shorten.
+# * **Fiber Stretch ($\lambda$):** Should decrease ($\lambda < 1$) as fibers contract.
+# * **Von-Mises stress:** Internal tension generated by the active fibers.
 
-# 5. Post-Processing
-print("\n--- Starting 3D Post-Processing ---")
-
-# Pyvista-based visualization
-# Generates videos of displacement, fiber stretch, and stress fields
+# %% tags=["output_scroll"]
 postprocess_from_file(
     output_dir=results_dir,
     conf_file=config_path,
 )
 
-print("Done.")
+# %% [markdown]
+# Below is the animation of the muscle contracting. Notice how the belly bulges outward as the ends shorten, preserving the total tissue volume.
+# <img src="../results/demos/contraction_demo_postprocessed/video/animation_displacement.gif" width="500" align="center">
