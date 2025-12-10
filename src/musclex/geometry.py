@@ -118,7 +118,7 @@ class Geometry:
         """
         from matplotlib.colors import ListedColormap
         import pyvista
-        pyvista.start_xvfb()
+        #pyvista.start_xvfb()
         pyvista.global_theme.camera.viewup = [0, 0, 1]
 
         tdim = self.domain.topology.dim
