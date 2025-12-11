@@ -1,8 +1,8 @@
 # %% [markdown]
 # # Visualizing 3D Leg Muscle Anatomy from STL Files
 #
-# We created 12 realistic muscle geometries based on segmentations of the Visible Human dataset ([Andreassen et al., 2023](https://doi.org/10.1038/s41597-022-01905-2)). 
-# These include the tibialis anterior, biceps femoris long head, and semitendinosus muscles for both left and right legs, male and female. 
+# We created 12 realistic muscle geometries based on segmentations of the Visible Human dataset ([Andreassen et al., 2023](https://doi.org/10.1038/s41597-022-01905-2)).
+# These include the tibialis anterior, biceps femoris long head, and semitendinosus muscles for both left and right legs, male and female.
 #
 # In this script, we use PyVista to visualize these 3D muscle geometries with custom coloring for different tissue types and specific muscles.
 
@@ -11,15 +11,9 @@ import pyvista as pv
 from pathlib import Path
 
 pv.set_jupyter_backend("static")
-
-# %%
-base_path = Path("..") / "data" / "VHF_surfaces"
-output_file = Path("..") / "results" / "geometries" / "anatomy_view.png"
-output_file.parent.mkdir(parents=True, exist_ok=True)
-
+surfaces_path = Path("..") / "data" / "VHF_surfaces"
 
 # %% [markdown]
-# We define custom colors for the specific muscles. 
 # The tibialis anterior is shown in dark red, the biceps femoris long head in bright red, and the semitendinosus in orange.
 # Non-highlighted muscles are soft pink, whereas bones and other tissues are white.
 
@@ -47,14 +41,14 @@ tissue_colors = {
 # %% [markdown]
 # We now load all STL files from the specified directory and visualize them with PyVista.
 
-# %% 
+# %%
 plotter = pv.Plotter(shape=(1, 2), window_size=[1200, 1200], off_screen=True)
 plotter.set_background("white")
 
 
 loaded_count = 0
 
-for filepath in base_path.rglob("*.stl"):
+for filepath in surfaces_path.rglob("*.stl"):
     filename = filepath.name
 
     # --- Logic to determine color/style ---
@@ -84,24 +78,23 @@ for filepath in base_path.rglob("*.stl"):
 
     loaded_count += 1
 
-print(f"Total parts loaded from {base_path}: {loaded_count}")
+print(f"Total parts loaded from {surfaces_path}: {loaded_count}")
 
 # Front View
 plotter.subplot(0, 0)
 plotter.view_xz(negative=True)
-plotter.camera.up = (0, 0, 1)
 plotter.camera.zoom(1.8)
 
 # Back View
 plotter.subplot(0, 1)
 plotter.view_xz(negative=False)
-plotter.camera.up = (0, 0, 1)
 plotter.camera.zoom(1.8)
 
 # Render the combined image
 plotter.show()
 
 # %%
+output_file = Path("..") / "results" / "geometries" / "anatomy_view.png"
+output_file.parent.mkdir(parents=True, exist_ok=True)
 plotter.screenshot(output_file, scale=4)
 print(f"Anatomy view saved to: {output_file}")
-
