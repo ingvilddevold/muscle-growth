@@ -78,6 +78,9 @@ jobs:
   merge-and-publish:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs:
       - build
     steps:
