@@ -42,8 +42,10 @@ conda create --name snakemake_env -c conda-forge -c bioconda snakemake snakemake
 
 
 ### Docker
-Coming soon
-
+The latest Docker image containing dependencies and the `musclex` package can be pulled from
+```bash
+docker pull ghcr.io/ingvilddevold/muscle-growth:main
+```
 
 ## Usage
 
