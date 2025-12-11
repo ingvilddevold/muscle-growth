@@ -232,7 +232,8 @@ class PostProcessor:
                 fps=8,
             ) as writer:
                 for frame in frame_data:
-                    writer.append_data(frame)
+                    rgb_frame = frame[..., :3]
+                    writer.append_data(rgb_frame)
 
             # --- Create MP4 ---
             mp4_path = video_dir / f"animation_{scalar_key}.mp4"
