@@ -177,8 +177,14 @@ class PostProcessor:
         )
 
         # Annotate time
+        days = int(time // 24)
+        hours = time % 24
+        if days > 0:
+            time_str = f"Time: {days}d {hours:.0f}h"
+        else:
+            time_str = f"Time: {hours:.0f}h"
         plotter.add_text(
-            f"Time: {time:.2f}",
+            time_str,
             position="top",
             font_size=20,
         )
