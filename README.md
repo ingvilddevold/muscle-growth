@@ -1,7 +1,7 @@
 # Supplementary code: Computational modeling of exercise-induced skeletal muscle hypertrophy through the IGF1-AKT signaling pathway
 
 This repository contains the implementation of the coupled signaling-mechanics model of exercise-induced skeletal muscle growth described in the paper 
-"Computational modeling of exercise-induced skeletal muscle hypertrophy through the IGF1-AKT signaling pathway", I.S. Devold, P. Rangamani and M.E. Rognes (2025).
+>I.S. Devold, P. Rangamani and M.E. Rognes (2025) "Computational modeling of exercise-induced skeletal muscle hypertrophy through the IGF1-AKT signaling pathway".
 
 The framework couples a tissue-level transversely isotropic hyperelastic model with a system of ODEs representing the IGF1-AKT-mTOR-FOXO signaling pathway. This multiscale approach links exercise-driven cellular signaling events to macroscopic volumetric growth.
 
@@ -13,7 +13,7 @@ The framework couples a tissue-level transversely isotropic hyperelastic model w
 
 
 
-## Installation and dependencies
+## Installation and Dependencies
 The project is based on [FEniCSx](https://fenicsproject.org) v0.10.0. 
 The workflow management system [Snakemake](https://snakemake.readthedocs.io/en/stable/#) is used to run scripts and reproduce the results. 
 
@@ -25,7 +25,6 @@ The workflow management system [Snakemake](https://snakemake.readthedocs.io/en/s
 - **Workflow**: [Snakemake](https://snakemake.readthedocs.io/en/stable/#)
 
 All dependencies are listed in `environment.yml`.
-
 
 
 ### Conda
@@ -49,7 +48,7 @@ docker pull ghcr.io/ingvilddevold/muscle-growth:main
 
 ## Usage
 
-### Reproducing paper results
+### Reproducing Paper Results
 
 The workflow is organized into distinct Snakefiles in `scripts/`, each corresponding to a Results section and figure from the paper.
 
@@ -76,16 +75,32 @@ To run locally, use Conda and specify the number of cores:
 ```bash
 snakemake -s scripts/Snakefile_XXX.smk --use-conda --cores 4
 ```
-Note: `Snakefile_realistic.smk` and `Snakefile_heterogeneity.smk` are intended for HPC (eX3) due to long runtimes. For local runs, especially for plotting, you may need to remove `xvfb-run` commands.
+*Note: `Snakefile_realistic.smk` and `Snakefile_heterogeneity.smk` are intended for HPC (eX3) due to long runtimes. For local runs, especially for plotting, you may need to remove `xvfb-run` commands.*
 
 
-### Demo scripts
+### Demo Scripts
 Standalone demo scripts in `demos/` can be run on a standard laptop:
 - `demo_signaling_model.py`: Signaling model simulation for an example exercise protocol
 - `demo_muscle_contraction.py`: Muscle contraction in an idealized fusiform geometry
 - `demo_coupled_model.py`: Coupled signaling-mechanics model in an idealized fusiform geometry
 
+These scripts are also available as tutorials in the [docs](https://ingvilddevold.github.io/muscle-growth/README.html).
 
 
-## Geometries
-The realistic muscle geometries used in this study were derived from the [Visible Human Dataset](https://digitalcommons.du.edu/visiblehuman/). The processed meshes and fiber fields required to run `Snakefile_realistic.smk` are available in the `meshes/` directory. These include the Biceps Femoris Long Head, Semitendinosus and Tibialis Anterior leg muscles, with four instances of each (male and female, left and right).
+## Realistic Muscle Geometries
+The realistic muscle geometries used in this study were derived from the **Visible Human Dataset** as processed by Andreassen et al. (2023). 
+A copy of the [original surface geometries](https://digitalcommons.du.edu/visiblehuman/) is included under `data/VHF_surfaces` (female) and `data/VHM_surfaces` (male), while the processed meshes and fiber fields required to run `Snakefile_realistic.smk` are available in the `meshes/` directory. 
+These processed geometries include the **Biceps Femoris Long Head**, **Semitendinosus**, and **Tibialis Anterior** muscles, with four instances of each (male and female, left and right).
+
+### Data License & Attribution
+The geometry data included in `data/` are licensed under the Creative Commons Attribution 4.0 International License ([CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)). Accordingly, please attribute the original datasets to the following works:
+
+> Andreassen, T. E., et al. (2023). Three Dimensional Lower Extremity Musculoskeletal Geometry of the Visible Human Female and Male. *Scientific Data*, 10. [DOI: 10.1038/s41597-022-01905-2](https://doi.org/10.1038/s41597-022-01905-2)
+> 
+> Andreassen, T. E., et al. (2024).
+"Automated 2D and 3D finite element overclosure adjustment and mesh morphing using generalized regression neural networks."
+*Medical Engineering & Physics*, 126.
+[DOI: 10.1016/j.medengphy.2024.104136](https://doi.org/10.1016/j.medengphy.2024.104136)
+
+*Note: The software code in this repository remains licensed under the MIT License.* 
+
