@@ -1,9 +1,9 @@
-# Supplementary code: Computational modeling of exercise-induced skeletal muscle hypertrophy through the IGF1-AKT signaling pathway
+# Supplementary code: Mechanochemical modeling of exercise-induced skeletal muscle hypertrophy
 [![DOI](https://zenodo.org/badge/1105944660.svg)](https://doi.org/10.5281/zenodo.17902802)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This repository contains the implementation of the coupled signaling-mechanics model of exercise-induced skeletal muscle growth described in the paper 
->I.S. Devold, P. Rangamani and M.E. Rognes (2025) "Computational modeling of exercise-induced skeletal muscle hypertrophy through the IGF1-AKT signaling pathway".
+>I.S. Devold, P. Rangamani and M.E. Rognes (2025) "Mechanochemical modeling of exercise-induced skeletal muscle hypertrophy".
 
 The framework couples a tissue-level transversely isotropic hyperelastic model with a system of ODEs representing the IGF1-AKT-mTOR-FOXO signaling pathway. This multiscale approach links exercise-driven cellular signaling events to macroscopic volumetric growth.
 
