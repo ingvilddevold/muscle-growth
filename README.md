@@ -2,8 +2,8 @@
 [![DOI](https://zenodo.org/badge/1105944660.svg)](https://doi.org/10.5281/zenodo.17902802)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This repository contains the implementation of the coupled signaling-mechanics model of exercise-induced skeletal muscle growth described in the paper 
->I.S. Devold, P. Rangamani and M.E. Rognes (2025) "Mechanochemical modeling of exercise-induced skeletal muscle hypertrophy".
+This repository contains the implementation of the coupled signaling-mechanics model of exercise-induced skeletal muscle growth described in the paper
+>I.S. Devold, M.E. Rognes, and P. Rangamani (2025) "Mechanochemical modeling of exercise-induced skeletal muscle hypertrophy".
 
 The framework couples a tissue-level transversely isotropic hyperelastic model with a system of ODEs representing the IGF1-AKT-mTOR-FOXO signaling pathway. This multiscale approach links exercise-driven cellular signaling events to macroscopic volumetric growth.
 
@@ -64,8 +64,8 @@ Run the specific Snakefile for the desired figure. Snakemake will automatically 
 | Snakefile | Description | Figure |
 | :--- | :--- | :--- |
 | `Snakefile_signaling.smk` | **Signaling Dynamics (ODE only)**<br>Simulates the time evolution of IGF1, AKT, FOXO, and mTOR under three exercise protocols (MWF, Weekly, Every-3-days). | Fig. 3 |
-| `Snakefile_idealized.smk` | **Muscle Growth in Idealized Geometry**<br>Runs the full coupled model on an idealized fusiform geometry. Outputs include time-courses for Cross-Sectional Area (CSA), Volume, and the feedback-regulated protein synthesis rate $k_M$. | Fig. 4 |
-| `Snakefile_realistic.smk` | **Realistic Geometries**<br>Simulates growth across 12 anatomically realistic meshes (Biceps Femoris, Semitendinosus, Tibialis Anterior) derived from the Visible Human Dataset. | Fig. 6 |
+| `Snakefile_idealized.smk` | **Muscle Growth in Idealized Geometry**<br>Runs the full coupled model on an idealized fusiform geometry. Outputs include time-courses for Cross-Sectional Area (CSA), Volume, and the feedback-regulated protein synthesis rate $k_M$, as well as the full 3D displacement data. | Fig. 4 |
+| `Snakefile_realistic.smk` | **Realistic Geometries**<br>Simulates growth across 12 anatomically realistic meshes (Biceps Femoris Long Head, Semitendinosus, Tibialis Anterior) derived from the Visible Human Dataset. | Fig. 6 |
 | `Snakefile_heterogeneity.smk` | **Signaling Heterogeneity**<br>Runs an ensemble simulation with spatially perturbed signaling parameters (IGF1, AKT, FOXO, mTOR) to assess the impact of local biological variability on macroscopic tissue deformation. Uses the female left BFLH geometry and the MWF protocol. | Fig. 7 |
 
 #### Running the Snakefiles
@@ -82,9 +82,9 @@ snakemake -s scripts/Snakefile_XXX.smk --use-conda --cores 4
 
 ### Demo Scripts
 Standalone demo scripts in `demos/` can be run on a standard laptop:
-- `demo_signaling_model.py`: Signaling model simulation for an example exercise protocol
-- `demo_muscle_contraction.py`: Muscle contraction in an idealized fusiform geometry
-- `demo_coupled_model.py`: Coupled signaling-mechanics model in an idealized fusiform geometry
+- `demo_signaling_model.py`: Signaling model simulation for an example exercise protocol.
+- `demo_muscle_contraction.py`: Muscle contraction in an idealized fusiform geometry.
+- `demo_coupled_model.py`: Coupled signaling-mechanics model in an idealized fusiform geometry.
 
 These scripts are also available as tutorials in the [docs](https://ingvilddevold.github.io/muscle-growth/README.html).
 
