@@ -82,9 +82,11 @@ snakemake -s scripts/Snakefile_XXX.smk --use-conda --cores 4
 
 ### Demo Scripts
 Standalone demo scripts in `demos/` can be run on a standard laptop:
-- `demo_signaling_model.py`: Signaling model simulation for an example exercise protocol.
-- `demo_muscle_contraction.py`: Muscle contraction in an idealized fusiform geometry.
-- `demo_coupled_model.py`: Coupled signaling-mechanics model in an idealized fusiform geometry.
+| Script | Description | Expected run time |
+| :--- | :--- | :--- |
+| `demo_signaling_model.py` | Signaling model simulation for an example exercise protocol. | < 10 sec |
+| `demo_muscle_contraction.py` | Muscle contraction in an idealized fusiform geometry. | ~ 1.5 min |
+| `demo_coupled_model.py` | Coupled signaling-mechanics model in an idealized fusiform geometry. | ~ 5 min |
 
 These scripts are also available as tutorials in the [docs](https://ingvilddevold.github.io/muscle-growth/README.html).
 
