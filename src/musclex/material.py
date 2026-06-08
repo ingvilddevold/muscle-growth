@@ -385,7 +385,7 @@ class MuscleRohrle:
 
         # Return piecewise function
         return ufl.conditional(
-            ufl.le(lmbda, self.lmbda_0),
+            ufl.le(lmbda, self.lmbda_opt),
             0.0,
             ufl.conditional(
                 ufl.le(lmbda, lim_linear),
