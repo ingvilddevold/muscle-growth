@@ -161,7 +161,7 @@ class MuscleRohrle:
         self.sigma_act_ff = dolfinx.fem.Constant(
             self.domain, self.params["sigma_act_ff"]
         )
-        self.lmbda_0 = dolfinx.fem.Constant(self.domain, self.params["lmbda_0"])
+        self.lmbda_opt = dolfinx.fem.Constant(self.domain, self.params["lmbda_opt"])
         self.g1 = dolfinx.fem.Constant(self.domain, self.params["g1"])
         self.g2 = dolfinx.fem.Constant(self.domain, self.params["g2"])
         self.k_tendon = dolfinx.fem.Constant(self.domain, self.params["k_tendon"])
@@ -348,7 +348,7 @@ class MuscleRohrle:
 
     def force_active(self, I4):
         """Normalized active fiber force. Given as a piecewise polynomial"""
-        l = ufl.sqrt(I4) / self.lmbda_0
+        l = ufl.sqrt(I4) / self.lmbda_opt
         return ufl.conditional(
             ufl.le(l, 0.4),
             0,
@@ -365,16 +365,30 @@ class MuscleRohrle:
 
     def force_passive(self, I4):
         """Normalized passive fiber force. Given as a piecewise exponential function."""
-        l = ufl.sqrt(I4) / self.lmbda_0
-        f_p1 = self.g1 * (ufl.exp(self.g2 * (l - 1)) - 1)
-        f_p2 = (self.g1 * self.g2 * ufl.exp(0.4 * self.g2)) * l + self.g1 * (
-            (1 - 1.4 * self.g2) * ufl.exp(0.4 * self.g2) - 1
-        )
+        
+        # Threshold where linear behavior starts (Fiorentino et al., 2014)
+        lim_linear = 1.06
+        # Normalized stretch at the transition point
+        l_star = lim_linear / self.lmbda_opt
+        
+        # Normalized stretch (lmbda) and normalized stretch (l)
+        lmbda = ufl.sqrt(I4)
+        l = lmbda / self.lmbda_opt
+
+        # Compute the continuity coefficients gamma_3 and gamma_4
+        g3 = self.g1 * self.g2 * ufl.exp(self.g2 * (l_star - 1.0))
+        g4 = self.g1 * (ufl.exp(self.g2 * (l_star - 1.0)) - 1.0) - (g3 * l_star)
+
+        # Define exponential and linear expressions
+        f_p1 = self.g1 * (ufl.exp(self.g2 * (l - 1.0)) - 1.0)
+        f_p2 = g3 * l + g4
+
+        # Return piecewise function
         return ufl.conditional(
-            ufl.le(l, 1),
+            ufl.le(lmbda, self.lmbda_0),
             0.0,
             ufl.conditional(
-                ufl.le(l, 1.4),
+                ufl.le(lmbda, lim_linear),
                 f_p1,
                 f_p2,
             ),
