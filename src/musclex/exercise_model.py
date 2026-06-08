@@ -136,12 +136,10 @@ class ExerciseModel:
         x3_th = self.params["x3_th"]
         x4_th = self.params["x4_th"]
 
-        # Checks if z is outside the range [z_min, z_max], in which case
-        # no myofibril growth is possible. Otherwise, add contributions from
-        # FOXO and mTOR if they are above their respective thresholds.
-        if z < z_min or z > z_max:
-            roc = 0
-        elif x3 < x3_th and x4 < x4_th:
+        # Calculate the tentative rate of change
+        # Adding contributions from FOXO and mTOR when they
+        # are above their respective thresholds.
+        if x3 < x3_th and x4 < x4_th:
             roc = 0
         elif x3 > x3_th and x4 > x4_th:
             roc = k1 * (x4 - x4_th) - k2 * (x3 - x3_th)
@@ -151,6 +149,16 @@ class ExerciseModel:
             roc = k1 * (x4 - x4_th)
         else:
             raise (ValueError)
+
+        # If we are at or below the minimum, we can't degrade
+        # further (roc < 0) but we can grow (roc > 0).
+        if z <= z_min and roc < 0:
+            roc = 0
+
+        # If we are at or above the maximum, we can't grow
+        # further (roc > 0) but we can degrade (roc < 0).
+        elif z >= z_max and roc > 0:
+            roc = 0
         return roc
 
     def rhs(
