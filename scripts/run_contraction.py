@@ -49,6 +49,7 @@ def main(
         output_dir,
         clamp_type="robin"
     )
+    material_model.setup_solver()
 
     # --- 3. Run the simulation ---
     # Define the activation levels to test
