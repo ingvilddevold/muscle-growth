@@ -36,7 +36,6 @@ class MuscleRohrle:
         fibers,
         output_dir: Path = tmpdir,
         clamp_type: str = "full",  # "full", "z", "robin" or "none"
-        pin_endpoint: bool = False, # whether to pin a point at one endpoint when using robin BCs
     ):
         self.domain = domain
         self.ft = ft
@@ -44,7 +43,6 @@ class MuscleRohrle:
         self.output_dir = output_dir
         self.output_dir.mkdir(exist_ok=True, parents=True)
         self.clamp_type = clamp_type
-        self.pin_endpoint = pin_endpoint
 
         self.domain.topology.create_connectivity(
             self.domain.topology.dim - 1, self.domain.topology.dim
@@ -298,52 +296,6 @@ class MuscleRohrle:
              - ufl.dot(value, self.v) * cofnorm * self.ds(2)
         mpiprint(f"Applying Robin BC with k={self.k_tendon.value}.")
 
-        # In addition, pin a point at one end to prevent rigid body motion
-        # This is needed for the idealized geometry where Robin BCs on the flat
-        # end surfaces do not fully constrain the muscle.
-        if self.pin_endpoint:
-            N = 1 # number of points to pin
-            bcs = []
-            for tag in [1]: # pin only at one end
-                end_face_facets = self.ft.find(tag)
-                self.domain.topology.create_connectivity(self.domain.topology.dim - 1, 0)
-                end_face_vertices = dolfinx.mesh.compute_incident_entities(
-                    self.domain.topology, end_face_facets, self.domain.topology.dim - 1, 0
-                )
-                end_face_vertices = np.unique(end_face_vertices)
-
-                # Get coordinates of all vertices on the end face
-                end_face_coords = self.domain.geometry.x[end_face_vertices]
-
-                # Calculate the centroid of the end face
-                centroid = np.mean(end_face_coords, axis=0)
-                # Find the vertices on the end face closest to the centroid
-                distances = np.linalg.norm(end_face_coords - centroid, axis=1)
-                closest_vertex_local_idxs = np.argsort(distances)[:N]
-                closest_vertex_global_idxs = end_face_vertices[closest_vertex_local_idxs]
-
-                pin_vertex = np.array(closest_vertex_global_idxs, dtype=np.int32)
-
-                point_coords = self.domain.geometry.x[pin_vertex]
-                mpiprint(
-                    f"Pinning point at vertex index {pin_vertex} with coordinates {point_coords}."
-                )
-                # Create 0-3 connectivity
-                self.domain.topology.create_connectivity(0, self.domain.topology.dim)
-
-                # Find displacement DOF of chosen vertices
-                point_dof = dolfinx.fem.locate_dofs_topological(
-                    (self.state_space.sub(0), self.V), 0, pin_vertex
-                )
-                # Set dofs to zero displacement
-                u_zero = dolfinx.fem.Function(self.V)
-                bc_pin = dolfinx.fem.dirichletbc(u_zero, point_dof, self.state_space.sub(0))
-
-                bcs.append(bc_pin)
-            return R, bcs
-        else:
-            return R, []
-
         return R
 
     def force_active(self, I4):
@@ -505,7 +457,8 @@ class MuscleRohrle:
         elif self.clamp_type == "z":
             bcs = self.clamp_axial_and_pin_point()
         elif self.clamp_type == "robin":
-            R, bcs = self.clamp_robin(R)
+            R = self.clamp_robin(R)
+            bcs = []
         elif self.clamp_type == "none":
             bcs = []
         else:
