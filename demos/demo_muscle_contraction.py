@@ -65,6 +65,7 @@ material_model = MuscleRohrle(
     results_dir,      # Output directory
     clamp_type="robin", # Spring-like tendon boundaries
 )
+material_model.setup_solver()
 
 # %% [markdown]
 # ## Run the simulation
