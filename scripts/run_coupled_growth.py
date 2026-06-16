@@ -34,6 +34,13 @@ protocols = {
         initial_rest=7 * 24,
         intensity=0.2,
     ),
+    "oneweek": RegularExercise(
+        N=7,
+        exercise_duration=1,
+        growth_duration=23,
+        end_time=7 * 24,
+        initial_rest=0,
+    ),
 }
 
 
