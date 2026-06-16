@@ -65,12 +65,13 @@ class Geometry:
     @property
     def volume(self) -> float:
         """Return the total volume of the mesh"""
-        return dolfinx.fem.assemble_scalar(
+        volume_local = dolfinx.fem.assemble_scalar(
             dolfinx.fem.form(
                 dolfinx.fem.Constant(self.domain, PETSc.ScalarType(1))
                 * ufl.dx(self.domain)
             )
         )
+        return self.domain.comm.allreduce(volume_local, op=MPI.SUM)
 
     def compute_csa(self, u=None):
         """Compute cross-sectional area of the muscle."""
