@@ -35,7 +35,7 @@ class MuscleRohrle:
         conf_file: str,
         fibers,
         output_dir: Path = tmpdir,
-        clamp_type: str = "full",  # "full", "z", "robin" or "none"
+        clamp_type: str = "full",  # "full", "robin" or "none"
     ):
         self.domain = domain
         self.ft = ft
@@ -190,83 +190,6 @@ class MuscleRohrle:
             dolfinx.fem.dirichletbc(u_zero, clamped_dofs_1, self.state_space.sub(0)),
             dolfinx.fem.dirichletbc(u_zero, clamped_dofs_2, self.state_space.sub(0)),
         ]
-        return bcs
-
-    def clamp_axial_and_pin_point(self):
-        """
-        Applies boundary conditions to simulate an isometric contraction.
-        1. Clamps the axial (Z) displacement on both end faces.
-        2. Clamps the transverse (X, Y) displacement on a single point
-           to prevent rigid body motion.
-        """
-        bcs = []
-
-        # --- Part 1: Constrain axial (z) displacement on ends ---
-
-        # Isolate function space for z-component of displacement
-        z_comp_space, _ = self.state_space.sub(0).sub(2).collapse()
-        u_zero_scalar = dolfinx.fem.Function(z_comp_space)
-        u_zero_scalar.x.array[:] = 0.0
-
-        # Find DOFs for z-component on bottom end (tag 1)
-        clamped_dofs_z_1 = dolfinx.fem.locate_dofs_topological(
-            (self.state_space.sub(0).sub(2), z_comp_space), self.ft.dim, self.ft.find(1)
-        )
-        bc_z1 = dolfinx.fem.dirichletbc(
-            u_zero_scalar, clamped_dofs_z_1, self.state_space.sub(0).sub(2)
-        )
-        bcs.append(bc_z1)
-
-        # Find DOFs for z-component on top end (tag 2)
-        clamped_dofs_z_2 = dolfinx.fem.locate_dofs_topological(
-            (self.state_space.sub(0).sub(2), z_comp_space), self.ft.dim, self.ft.find(2)
-        )
-        bc_z2 = dolfinx.fem.dirichletbc(
-            u_zero_scalar, clamped_dofs_z_2, self.state_space.sub(0).sub(2)
-        )
-        bcs.append(bc_z2)
-
-        # --- Part 2: Constrain Points ---
-        # Find the N vertices on each end face (tags 1 and 2) closest to the
-        # centroid of that face.
-        N = 10
-        for tag in [1, 2]:
-            end_face_facets = self.ft.find(tag)
-            self.domain.topology.create_connectivity(self.domain.topology.dim - 1, 0)
-            end_face_vertices = dolfinx.mesh.compute_incident_entities(
-                self.domain.topology, end_face_facets, self.domain.topology.dim - 1, 0
-            )
-            end_face_vertices = np.unique(end_face_vertices)
-
-            # Get coordinates of all vertices on the end face
-            end_face_coords = self.domain.geometry.x[end_face_vertices]
-
-            # Calculate the centroid of the end face
-            centroid = np.mean(end_face_coords, axis=0)
-            # Find the vertices on the end face closest to the centroid
-            distances = np.linalg.norm(end_face_coords - centroid, axis=1)
-            closest_vertex_local_idxs = np.argsort(distances)[:N]
-            closest_vertex_global_idxs = end_face_vertices[closest_vertex_local_idxs]
-
-            pin_vertex = np.array(closest_vertex_global_idxs, dtype=np.int32)
-
-            point_coords = self.domain.geometry.x[pin_vertex]
-            mpiprint(
-                f"Pinning point at vertex index {pin_vertex} with coordinates {point_coords}."
-            )
-            # Create 0-3 connectivity
-            self.domain.topology.create_connectivity(0, self.domain.topology.dim)
-
-            # Find displacement DOF of chosen vertices
-            point_dof = dolfinx.fem.locate_dofs_topological(
-                (self.state_space.sub(0), self.V), 0, pin_vertex
-            )
-            # Set dofs to zero displacement
-            u_zero = dolfinx.fem.Function(self.V)
-            bc_pin = dolfinx.fem.dirichletbc(u_zero, point_dof, self.state_space.sub(0))
-
-            bcs.append(bc_pin)
-
         return bcs
 
     def clamp_robin(self, R):
@@ -454,8 +377,6 @@ class MuscleRohrle:
         ## --------- BOUNDARY CONDITIONS --------- ##
         if self.clamp_type == "full":
             bcs = self.clamp_ends_mixed()
-        elif self.clamp_type == "z":
-            bcs = self.clamp_axial_and_pin_point()
         elif self.clamp_type == "robin":
             R = self.clamp_robin(R)
             bcs = []
