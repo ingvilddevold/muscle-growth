@@ -116,11 +116,9 @@ class MuscleGrowthModel:
 
         # Write displacement field to u_growth.bp
         self.outfile_vis.write(t)
-        mpiprint(f"Output written for time {t:.2f} s to {self.outfile_vis}")
 
         # Write displacement field to u_growth_pp.bp
         adios4dolfinx.write_function(self.outfile_pp, self.u_sol, time=t)
-        mpiprint(f"Output written for time {t:.2f} s to {self.outfile_pp}")
 
         # Track output time
         self.output_times.append(t)
