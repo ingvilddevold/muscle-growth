@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import time
 from pathlib import Path
+from mpi4py import MPI
 import yaml
 from musclex.utils import get_interpolation_points, mpiprint
 
@@ -263,12 +264,14 @@ class MuscleGrowthModel:
                 else:
                     k1_history.append(self.exercise_model.params["k1"])
 
-                volume = dolfinx.fem.assemble_scalar(
+                local_volume = dolfinx.fem.assemble_scalar(
                     dolfinx.fem.form(
                         ufl.det(F_tot) * ufl.dx
                     )  # F_tot implicitly updated
                 )
-                volumes_history.append(volume)
+
+                global_volume = comm.allreduce(local_volume, op=MPI.SUM)
+                volumes_history.append(global_volume)
 
                 # --- Write output ---
                 # Write every output_freq steps and at the last step
