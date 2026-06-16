@@ -6,7 +6,7 @@ import typer
 import dolfinx
 from musclex.material import MuscleRohrle
 from musclex.geometry import IdealizedFusiform, RealisticGeometry
-
+from musclex.utils import mpiprint
 
 app = typer.Typer()
 
@@ -23,8 +23,8 @@ def main(
     """
     # Create the output directory if it doesn't exist
     output_dir.mkdir(exist_ok=True, parents=True)
-    print(f"Running active contraction for mesh: '{mesh_name}'")
-    print(f"Results will be saved to: {output_dir}")
+    mpiprint(f"Running active contraction for mesh: '{mesh_name}'")
+    mpiprint(f"Results will be saved to: {output_dir}")
 
     # Reduce verbosity during setup
     dolfinx.log.set_log_level(dolfinx.log.LogLevel.WARNING)
@@ -55,18 +55,18 @@ def main(
     # Define the activation levels to test
     activation_levels = np.linspace(0.0, 1.0, 100)
 
-    print("Starting simulation using material_model.solve()...")
+    mpiprint("Starting simulation using material_model.solve()...")
     converged, forces = material_model.solve(activation_levels)
 
     if converged:
-        print("Simulation complete.")
+        mpiprint("Simulation complete.")
     else:
-        print("Warning: Simulation did not converge.")
+        mpiprint("Warning: Simulation did not converge.")
 
     # --- 4. Save the results ---
     # Create a dictionary for the DataFrame
-    print("len(forces): ", len(forces))
-    print("len(activation_levels): ", len(activation_levels))
+    mpiprint("len(forces): ", len(forces))
+    mpiprint("len(activation_levels): ", len(activation_levels))
     results_data = {
         "activation": activation_levels[:len(forces)],
         "force": forces
@@ -83,9 +83,9 @@ def main(
     output_npy = output_dir / "activation_levels.npy"
     np.save(output_npy, activation_levels[:len(forces)])
 
-    print(f"Force-activation results saved successfully to {output_csv}")
-    print("\n--- Final Results ---")
-    print(results_df)
+    mpiprint(f"Force-activation results saved successfully to {output_csv}")
+    mpiprint("\n--- Final Results ---")
+    mpiprint(results_df)
 
 
 if __name__ == "__main__":
