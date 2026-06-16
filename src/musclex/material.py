@@ -530,8 +530,8 @@ class MuscleRohrle:
                 "snes_max_it": 20,
                 "snes_type": "newtonls",
                 "snes_linesearch_type": "none",
-                "snes_monitor": None, # monitor for nonlinear solver
-                "ksp_monitor": None, # monitor for linear solver
+                #"snes_monitor": None, # monitor for nonlinear solver
+                #"ksp_monitor": None, # monitor for linear solver
             }
             solver = dolfinx.fem.petsc.NonlinearProblem(
                 R,
