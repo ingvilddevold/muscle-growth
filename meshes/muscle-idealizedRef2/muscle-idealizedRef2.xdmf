@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="https://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="Grid" GridType="Uniform">
+      <Topology TopologyType="Tetrahedron" NumberOfElements="127808" NodesPerElement="4">
+        <DataItem Dimensions="127808 4" NumberType="Int" Format="HDF">muscle-idealizedRef2.h5:/Mesh/Grid/topology</DataItem>
+      </Topology>
+      <Geometry GeometryType="XYZ">
+        <DataItem Dimensions="24847 3" Format="HDF">muscle-idealizedRef2.h5:/Mesh/Grid/geometry</DataItem>
+      </Geometry>
+    </Grid>
+    <Grid Name="ft" GridType="Uniform">
+      <xi:include xpointer="xpointer(/Xdmf/Domain/Grid/Geometry)" />
+      <Topology TopologyType="Triangle" NumberOfElements="14784" NodesPerElement="3">
+        <DataItem Dimensions="14784 3" NumberType="Int" Format="HDF">muscle-idealizedRef2.h5:/MeshTags/ft/topology</DataItem>
+      </Topology>
+      <Attribute Name="ft" AttributeType="Scalar" Center="Cell">
+        <DataItem Dimensions="14784 1" Format="HDF">muscle-idealizedRef2.h5:/MeshTags/ft/Values</DataItem>
+      </Attribute>
+    </Grid>
+  </Domain>
+</Xdmf>
