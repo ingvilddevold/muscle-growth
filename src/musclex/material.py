@@ -334,27 +334,13 @@ class MuscleRohrle:
         )
         return self.domain.comm.allreduce(Fr_local, op=MPI.SUM)
 
-    def solve(
-        self,
-        activation_levels=np.array([0.0]),
-        Fg=None,
-    ):
-        """Solve the mechanical model for a given set of activation levels
-
-        Args:
-            activation_levels (np.array): Activation levels. Defaults to [0.0].
-            Fg (ufl tensor, optional): Growth tensor. Defaults to None.
-
-        Returns:
-            n (int): Number of nonlinear solver iterations for final activation level.
-            converged (bool): Convergence status for final activation level.
-            reaction_forces (list): Reaction forces for each activation level.
-        """
-        self.prepare_output()
-
+    def setup_solver(self, Fg=None):
+        """Build the kinematics, weak form, and nonlinear solver ONCE."""
+        mpiprint("Setting up nonlinear solver...")
+        
         ## --------- KINEMATICS --------- ##
-        I = ufl.Identity(self.domain.geometry.dim)
-        F = I + ufl.grad(self.u)
+        Id = ufl.Identity(self.domain.geometry.dim)
+        F = Id + ufl.grad(self.u)
 
         # If a growth tensor is given, we solve for elastic deformation only
         if Fg:
@@ -365,11 +351,9 @@ class MuscleRohrle:
         Je = ufl.det(Fe)
 
         ## --------- MATERIAL MODEL --------- ##
-
         S = self.stress_PK2(self.alpha, Fe, self.p)  # Second Piola-Kirchhoff stress
         P = self.stress_PK1(S, Fe)  # First Piola-Kirchhoff stress
-        sigma = self.stress_Cauchy(P, Fe)  # Cauchy stress
-
+        self.sigma = self.stress_Cauchy(P, Fe)  # Save Cauchy stress to instance for reuse
 
         ## --------- DEFINE RESIDUAL --------- ##
         R = ufl.inner(ufl.grad(self.v), P) * self.dx + self.q * (Je - 1) * self.dx
@@ -384,15 +368,12 @@ class MuscleRohrle:
             bcs = []
         else:
             raise ValueError(
-                f"Unknown clamp_type '{self.clamp_type}'. Choose from 'full', 'z', 'robin', or 'none'."
+                f"Unknown clamp_type '{self.clamp_type}'. Choose from 'full', 'robin', or 'none'."
             )
         mpiprint(f"Using '{self.clamp_type}' clamp type.")
 
-        ## --------- SOLVE --------- ##
-
-
+        ## --------- SOLVE SETUP --------- ##
         # Set up non-linear solver
-        
         if is_dolfinx_10_or_newer:
             petsc_options_nonlinear = {
                 "ksp_type": "preonly",
@@ -407,7 +388,7 @@ class MuscleRohrle:
                 #"snes_monitor": None, # monitor for nonlinear solver
                 #"ksp_monitor": None, # monitor for linear solver
             }
-            solver = dolfinx.fem.petsc.NonlinearProblem(
+            self.solver = dolfinx.fem.petsc.NonlinearProblem(
                 R,
                 self.state,
                 petsc_options_prefix="tmp_",
@@ -419,36 +400,35 @@ class MuscleRohrle:
             def monitor(ksp, its, rnorm):
                 mpiprint(f"Iteration {its} residual: {rnorm}")
 
-            solver.solver.setMonitor(monitor)
+            self.solver.solver.setMonitor(monitor)
             
             if self.clamp_type == "none":
                 from musclex.solvers import build_nullspace
                 nullspace = build_nullspace(self.state_space)
-                solver.A.setNullSpace(nullspace)
+                self.solver.A.setNullSpace(nullspace)
         else:
-            solver = musclex.solvers.NewtonSolver(
+            self.solver = musclex.solvers.NewtonSolver(
                 R, self.state, bcs, set_nullspace=False
             )
 
-        # Initialize reaction force array
+    def solve(self, activation_levels=np.array([0.0])):
+        """Execute the pre-built nonlinear solver for given activation levels."""
+        self.prepare_output()
         reaction_forces = []
 
-        # Solve for each activation level
         mpiprint("Starting simulation...")
         tic = time.perf_counter()
         for i, a in enumerate(activation_levels):
-            mpiprint(f"{"="*50}\nSolving for activation level {a}")
+            mpiprint(f"{'='*50}\nSolving for activation level {a}")
             self.alpha.value = a  # set activation level
 
-            # Solve the nonlinear problem
-            # n, converged = solver.solve(self.state)
-
+            # Execute the lightweight solve
             dolfinx.log.set_log_level(dolfinx.log.LogLevel.INFO)
             if is_dolfinx_10_or_newer:
-                solver.solve()
-                converged = solver.solver.getConvergedReason() > 0
+                self.solver.solve()
+                converged = self.solver.solver.getConvergedReason() > 0
             else:
-                n, converged = solver.solve(self.state)
+                n, converged = self.solver.solve(self.state)
             dolfinx.log.set_log_level(dolfinx.log.LogLevel.WARNING)
 
             if not converged:
@@ -456,9 +436,8 @@ class MuscleRohrle:
                 mpiprint("Stopping simulation.")
                 break
 
-            # Compute reaction force in normal direction at muscle end
-            F_reac = self.reaction_force(sigma)
-            mpiprint(f"F_reac = {F_reac}")
+            # Compute reaction force
+            F_reac = self.reaction_force(self.sigma)
             reaction_forces.append(F_reac)
 
             # Update output functions
