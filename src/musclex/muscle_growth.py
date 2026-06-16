@@ -193,6 +193,7 @@ class MuscleGrowthModel:
         csas_history = []
         times_history = []
         k1_history = []
+        volume_form = dolfinx.fem.form(ufl.det(F_tot) * ufl.dx)
         volumes_history = []
         tic = time.perf_counter()  # start timer
 
@@ -268,14 +269,10 @@ class MuscleGrowthModel:
                 else:
                     k1_history.append(self.exercise_model.params["k1"])
 
-                local_volume = dolfinx.fem.assemble_scalar(
-                    dolfinx.fem.form(
-                        ufl.det(F_tot) * ufl.dx
-                    )  # F_tot implicitly updated
-                )
 
-                global_volume = comm.allreduce(local_volume, op=MPI.SUM)
-                volumes_history.append(global_volume)
+                local_volume = dolfinx.fem.assemble_scalar(volume_form)
+                volume = self.material_model.domain.comm.allreduce(local_volume, op=MPI.SUM)
+                volumes_history.append(volume)
 
                 # --- Write output ---
                 # Write every output_freq steps and at the last step
