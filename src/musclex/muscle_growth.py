@@ -185,6 +185,10 @@ class MuscleGrowthModel:
         else:
             k10 = self.exercise_model.params["k1"]
 
+        # Instantiate feedback function
+        V_dg0 = dolfinx.fem.functionspace(self.material_model.domain, ("DG", 0))
+        k1_feedback_field = dolfinx.fem.Function(V_dg0)
+
         # --- Initialize result trackers ---
         csas_history = []
         times_history = []
@@ -284,8 +288,6 @@ class MuscleGrowthModel:
                 self.csa.value = csa_new
                 feedback_scalar = self.feedback_function(csa_new / self.csa0)
 
-                V_dg0 = dolfinx.fem.functionspace(self.material_model.domain, ("DG", 0))
-                k1_feedback_field = dolfinx.fem.Function(V_dg0)
 
                 if self.is_spatial:
                     k1_feedback_field.x.array[:] = feedback_scalar * k10.x.array
