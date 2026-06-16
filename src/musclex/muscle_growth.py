@@ -230,7 +230,7 @@ class MuscleGrowthModel:
                 growth_rate_at_step = f_rate_history[idx, :]
 
                 self._update_growth_factor(growth_rate_at_step)
-                print(
+                mpiprint(
                     f"At growth time {t_growth:.2f}, growth rate is {self.growth_factor.x.array[0] if self.is_spatial else self.growth_factor.value}"
                 )
 
