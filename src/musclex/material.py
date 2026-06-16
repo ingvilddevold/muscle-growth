@@ -241,8 +241,8 @@ class MuscleRohrle:
     def force_passive(self, I4):
         """Normalized passive fiber force. Given as a piecewise exponential function."""
         
-        # Threshold where linear behavior starts (Fiorentino et al., 2014)
-        lim_linear = 1.06
+        # Threshold where linear behavior starts
+        lim_linear = 1.4
         # Normalized stretch at the transition point
         l_star = lim_linear / self.lmbda_opt
         
