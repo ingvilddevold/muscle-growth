@@ -153,6 +153,8 @@ class MuscleGrowthModel:
         G_tot.interpolate(identity_tensor)
         F_tot = A_tot * G_tot
 
+        self.material_model.setup_solver(Fg=G_tot)
+
         # --- Define expression for transversely isotropic growth tensor ---
         #   growth_factor : cross-sectional area growth factor (theta^2)
         #                   (defined in __init__ as Constant or Function)
@@ -242,7 +244,7 @@ class MuscleGrowthModel:
                 # set initial guess
                 self.material_model.state.x.array[:] = state_prev[:]
                 # solve
-                converged, _ = self.material_model.solve(Fg=G_tot)
+                converged, _ = self.material_model.solve()
                 # stop simulation if mechanics solver fails
                 if not converged:
                     mpiprint("Mechanics solver failed. Stopping growth simulation.")
