@@ -9,7 +9,7 @@ from pathlib import Path
 from mpi4py import MPI
 import yaml
 from musclex.utils import get_interpolation_points, mpiprint
-from musclex.utils import hill_feedback, linear_feedback
+from musclex.feedback import hill_feedback, linear_feedback
 
 class MuscleGrowthModel:
 
