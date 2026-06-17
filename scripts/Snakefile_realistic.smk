@@ -148,7 +148,7 @@ rule runGrowthSimulation:
     conda:
         "musclex"
     resources:
-        time="08:00:00",
+        time="02:00:00",
         ntasks=32,
     shell:
         """
