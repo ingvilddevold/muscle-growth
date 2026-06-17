@@ -78,6 +78,7 @@ rule runGrowthSimulation:
         ntasks=lambda wildcards: RESOURCES[wildcards.mesh]["ntasks"],
     shell:
         """
+        export OMP_NUM_THREADS=1 && \
         mpirun -n {resources.ntasks} python {SCRIPT_DIR}/run_coupled_growth.py \
             --exercise-config {input.exercise_config} \
             --material-config {input.material_config} \
