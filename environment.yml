@@ -1,16 +1,17 @@
 name: musclex
 channels:
-  - defaults
   - conda-forge
 dependencies:
   - python=3.12 # pin to avoid pyvista issues
   - fenics-dolfinx>=0.10.0
+  - adios4dolfinx
   - mpich
   - pyvista
   - meshio
+  - pygmsh
   - ipython
   - pyyaml
-  - matplotlib
+  - matplotlib<3.11.0 # scienceplots compatibility
   - scienceplots
   - scipy
   - seaborn
@@ -23,5 +24,3 @@ dependencies:
   - pip
   - pip:
     - -e . 
-    - adios4dolfinx
-    - gmsh
