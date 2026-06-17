@@ -21,16 +21,18 @@ class MuscleGrowthModel:
         csa_function,
         feedback="hill",
         output_freq: int = 10,
+        dt_growth = 1.0
     ):
         """Initialize the coupled exercise-mechanics model.
         Args:
-            exercise_model: Exercise model incl protocol
-            material_model: Material model incl geometry
-            output_dir: Results output directory
-            csa_function: Function to compute cross-sectional area from displacement field u
+            exercise_model: Exercise model incl protocol.
+            material_model: Material model incl geometry.
+            output_dir: Results output directory.
+            csa_function: Function to compute cross-sectional area from displacement field u.
             feedback: Feedback function type for protein synthesis rate.
                       Options are 'hill', 'linear', or False.
-            output_freq: Frequency for writing visualization files during simulation
+            output_freq: Frequency for writing visualization files during simulation.
+            dt_growth: Growth time step in hours.
         """
         # --- Store inputs ---
         self.exercise_model: musclex.exercise_model.ExerciseModel = exercise_model
@@ -43,7 +45,7 @@ class MuscleGrowthModel:
             self.material_model.domain, self.csa0
         )
         self.kappa: float = 1.0 / self.csa0
-        self.dt_growth: float = 1.0  # growth time step in hours
+        self.dt_growth: float = dt_growth
         self.output_freq: int = output_freq
 
         # --- Create growth_factor object ---
