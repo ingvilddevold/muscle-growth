@@ -21,7 +21,7 @@ class MuscleGrowthModel:
         csa_function,
         feedback="hill",
         output_freq: int = 10,
-        dt_growth = 1.0
+        dt_growth: float = 1.0
     ):
         """Initialize the coupled exercise-mechanics model.
         Args:
