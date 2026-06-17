@@ -8,7 +8,7 @@ cluster-generic-submit-cmd: module load mpich &&
   --output=logs/{rule}/{wildcards}-%j.out
   --time={resources.time}
 default-resources:
-  - partition=defq,milanq,fpgaq,genoaxq
+  - partition=milanq,fpgaq,genoaxq
   - mem="10G"
   - time="30:00"
   - ntasks=1
