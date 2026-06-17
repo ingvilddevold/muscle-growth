@@ -59,6 +59,7 @@ def main(
         ..., help="Path to the directory containing mesh files."
     ),
     output_freq: int = typer.Option(1, help="Frequency for saving output files."),
+    dt_growth: float = typer.Option(1.0, help="Growth time step in hours."),
     is_realistic: bool = typer.Option(
         False, help="Flag for realistic vs. idealized geometry."
     ),
@@ -127,6 +128,7 @@ def main(
         output_dir,
         output_freq=output_freq,
         csa_function=geometry.compute_csa,
+        dt_growth=dt_growth
     )
 
     # --- Run simulation ---
