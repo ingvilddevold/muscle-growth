@@ -332,7 +332,13 @@ class PostProcessor:
                     scalar_limits[key][1] = max(scalar_limits[key][1], max_val)
 
                 cached_field_data.append(frame_data)
-            except:
+            except Exception as e:
+                import traceback
+
+                print(
+                    f"  - Error processing frame {i+1} (activation={activation}): {e}"
+                )
+                traceback.print_exc()
                 break
         epsilon = 1e-10
         for key in scalar_limits.keys():
