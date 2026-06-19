@@ -1,12 +1,13 @@
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-from pathlib import Path
 import typer
-from typing_extensions import Annotated
+from matplotlib import rc
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-from matplotlib import rc
+from typing_extensions import Annotated
 
 # --- Matplotlib style ---
 plt.rcParams["font.family"] = "sans-serif"
@@ -20,7 +21,9 @@ app = typer.Typer()
 def get_muscle_type(mesh_name):
     if "BicepsFemoris" in mesh_name:
         return "BFLH"
-    if "Semitendinosus" in mesh_name or "Semitendonosus" in mesh_name: # account for typo
+    if (
+        "Semitendinosus" in mesh_name or "Semitendonosus" in mesh_name
+    ):  # account for typo
         return "ST"
     if "TibialisAnterior" in mesh_name:
         return "TA"
@@ -88,17 +91,13 @@ def main(
 
     # Muscle Color Palette
     muscle_palette = {
-        "TA": "#B22020",  
-        "BFLH": "#FF2752", 
-        "ST": "#FF7429",  
+        "TA": "#B22020",
+        "BFLH": "#FF2752",
+        "ST": "#FF7429",
     }
 
     # X-Axis Label Map
-    x_axis_labels = {
-        "TA": "TA",
-        "BFLH": "BFLH",
-        "ST": "ST"
-    }
+    x_axis_labels = {"TA": "TA", "BFLH": "BFLH", "ST": "ST"}
 
     # Markers for scatter
     gender_markers = {"Female": "o", "Male": "^"}
@@ -206,17 +205,11 @@ def main(
         ax.grid(axis="y", linestyle="--", alpha=0.7)
 
     # --- 5. Improve Plot Aesthetics ---
-    g.set_titles("") 
+    g.set_titles("")
 
     label_mapping = {
-        "volume_cm3": {
-            "title": "Muscle Volume", 
-            "ylabel": r"Volume (cm$^3$)"
-        },
-        "csa_cm2": {
-            "title": "Cross-Sectional Area", 
-            "ylabel": r"CSA (cm$^2$)"
-        }
+        "volume_cm3": {"title": "Muscle Volume", "ylabel": r"Volume (cm$^3$)"},
+        "csa_cm2": {"title": "Cross-Sectional Area", "ylabel": r"CSA (cm$^2$)"},
     }
 
     # Apply titles and y-labels
@@ -229,17 +222,16 @@ def main(
     # --- Apply X-Axis labels ---
     # Create a list of labels in the correct order corresponding to 'muscle_type_order'
     new_labels = [x_axis_labels.get(m, m) for m in muscle_type_order]
-    
+
     # Apply to the FacetGrid (this applies to the bottom-most axis by default)
     g.set_xticklabels(new_labels, fontsize=8, rotation=0)
 
-    g.set(xlabel=None) # remove Muscle Type label
+    g.set(xlabel=None)  # remove Muscle Type label
     g.set_yticklabels(fontsize=8)
     g.despine()
 
     # --- 6. Custom legend ---
     legend_elements = [
-
         # --- Section 1: Gender Mean (Pattern) ---
         Patch(facecolor="gray", label="Female Mean"),
         Patch(
@@ -249,7 +241,6 @@ def main(
             label="Male Mean",
         ),
         Line2D([0], [0], marker=None, color="none", label=""),
-
         # --- Section 2: Individual Data ---
         Line2D(
             [0],

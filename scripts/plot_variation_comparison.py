@@ -1,23 +1,19 @@
-import typer
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import scienceplots
+import typer
+from matplotlib import rc
 from typing_extensions import Annotated
-import numpy as np
 
 # --- Matplotlib Styling ---
-import scienceplots
-
 plt.style.use("science")
-from matplotlib import rc
-
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
 plt.rcParams["font.size"] = 7
 plt.rcParams["svg.fonttype"] = "none"  # make text editable in Inkscape
 rc("text", usetex=False)
-# --- End Styling ---
 
 
 def load_growth_data(csv_files: list[str], labels: list[str]) -> pd.DataFrame:

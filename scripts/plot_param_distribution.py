@@ -1,19 +1,18 @@
-import typer
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import yaml
-import numpy as np
 from pathlib import Path
-from typing_extensions import Annotated
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import scienceplots
+import seaborn as sns
+import typer
+import yaml
+from matplotlib import rc
 from matplotlib.ticker import MaxNLocator
+from typing_extensions import Annotated
 
 # --- Matplotlib Styling ---
-import scienceplots
-
 plt.style.use("science")
-from matplotlib import rc
-
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
 plt.rcParams["font.size"] = 8
@@ -87,11 +86,16 @@ def main(
 
         data = df[param_name]
         baseline_val = baseline_params.get(param_name)
-        plot_title = PARAM_LABEL_MAP.get(param_name, param_name) + f" (baseline {baseline_val:.2g})"
+        plot_title = (
+            PARAM_LABEL_MAP.get(param_name, param_name)
+            + f" (baseline {baseline_val:.2g})"
+        )
         ax.set_title(plot_title, fontsize=10, pad=2)
 
         # Plot histogram and KDE
-        sns.histplot(data, ax=ax, bins=30, stat="count", kde=True, alpha=0.7, color="gray")
+        sns.histplot(
+            data, ax=ax, bins=30, stat="count", kde=True, alpha=0.7, color="gray"
+        )
 
         # Plot baseline value as a vertical line
         if baseline_val is not None:
@@ -110,10 +114,7 @@ def main(
         ax.tick_params(top=False, right=False)
         ax.minorticks_off()
 
-        # --- FIX: Limit ticks and style the offset ---
-        # 1. Limit the number of x-ticks to prevent overlap
         ax.xaxis.set_major_locator(MaxNLocator(nbins=4, prune="both"))
-        # 2. Make the offset text (e.g., "+1.2e-3") small
         ax.xaxis.get_offset_text().set_fontsize("x-small")
 
     # 5. Hide any unused subplots

@@ -3,16 +3,17 @@ This script runs a single coupled muscle growth simulation for a given
 exercise protocol. It is designed to be called by Snakemake.
 """
 
-import dolfinx
-from mpi4py import MPI
-from musclex.protocol import DeFreitasProtocol, RegularExercise
-from musclex.exercise_model import ExerciseModel
-from musclex.muscle_growth import MuscleGrowthModel
-from musclex.material import MuscleRohrle
-from musclex.geometry import IdealizedFusiform, RealisticGeometry
 from pathlib import Path
-import typer
 
+import dolfinx
+import typer
+from mpi4py import MPI
+
+from musclex.exercise_model import ExerciseModel
+from musclex.geometry import IdealizedFusiform, RealisticGeometry
+from musclex.material import MuscleRohrle
+from musclex.muscle_growth import MuscleGrowthModel
+from musclex.protocol import DeFreitasProtocol, RegularExercise
 
 protocols = {
     "testing": RegularExercise(
@@ -129,7 +130,7 @@ def main(
         output_dir,
         output_freq=output_freq,
         csa_function=geometry.compute_csa,
-        dt_growth=dt_growth
+        dt_growth=dt_growth,
     )
 
     # --- Run simulation ---

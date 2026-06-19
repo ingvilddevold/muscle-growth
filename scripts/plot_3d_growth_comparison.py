@@ -1,21 +1,23 @@
-import dolfinx
-import ufl
+import os
+from pathlib import Path
+
 import adios4dolfinx
+import dolfinx
+import imageio
 import numpy as np
 import pyvista
-from pathlib import Path
-from mpi4py import MPI
 import typer
-import imageio
-import os
-from musclex.utils import get_interpolation_points
+import ufl
+from mpi4py import MPI
 
+from musclex.utils import get_interpolation_points
 
 # Set pyvista font and theme
 pyvista.global_theme.font.family = "arial"
 pyvista.global_theme.cmap = "viridis"
 
 M2MM = 1e3  # Conversion from meters to millimeters
+
 
 def get_displacment_at_time(
     bp_file: Path, mesh: dolfinx.mesh.Mesh, time: float
@@ -27,9 +29,7 @@ def get_displacment_at_time(
     return u
 
 
-def get_disp_magnitude(
-    mesh: dolfinx.mesh.Mesh, u: dolfinx.fem.Function
-) -> np.ndarray:
+def get_disp_magnitude(mesh: dolfinx.mesh.Mesh, u: dolfinx.fem.Function) -> np.ndarray:
     """Computes the magnitude of a displacement field on a DG0 space."""
     DG0 = dolfinx.fem.functionspace(mesh, ("DG", 0))
     disp_mag_func = dolfinx.fem.Function(DG0)
@@ -42,7 +42,9 @@ def get_disp_magnitude(
 
 def main(
     mesh_file: Path = typer.Option(..., help="Path to the original XDMF mesh file."),
-    sim_dirs: list[Path] = typer.Option(..., help="List of simulation output directories."),
+    sim_dirs: list[Path] = typer.Option(
+        ..., help="List of simulation output directories."
+    ),
     protocols: str = typer.Option(..., help="Comma-separated list of protocol names."),
     output_file: Path = typer.Option(..., help="Path to save the final PNG image."),
     warp_scale: float = typer.Option(10.0, help="Scaling factor for deformation."),
@@ -53,7 +55,9 @@ def main(
     """
     protocol_names = protocols.split(",")
     if len(sim_dirs) != len(protocol_names):
-        raise ValueError("Number of simulation directories must match number of protocols.")
+        raise ValueError(
+            "Number of simulation directories must match number of protocols."
+        )
 
     print("--- Starting 3D Growth Comparison Plot ---")
     # pyvista.start_xvfb()
@@ -72,7 +76,7 @@ def main(
     max_disp = 0.0
     for i, sim_dir in enumerate(sim_dirs):
         protocol = protocol_names[i]
-        
+
         # Load times from the .npy file
         times_file = sim_dir / "output_times.npy"
         if not times_file.exists():
@@ -108,7 +112,13 @@ def main(
     topo, cells, geom = dolfinx.plot.vtk_mesh(mesh)
     grid = pyvista.UnstructuredGrid(topo, cells, geom)
     grid.cell_data["Displacement (mm)"] = np.zeros(grid.n_cells)
-    plotter.add_mesh(grid, scalars="Displacement (mm)", show_edges=False, clim=clim, show_scalar_bar=False)
+    plotter.add_mesh(
+        grid,
+        scalars="Displacement (mm)",
+        show_edges=False,
+        clim=clim,
+        show_scalar_bar=False,
+    )
     if camera_pos:
         plotter.camera_position = eval(camera_pos)
     else:
@@ -121,15 +131,15 @@ def main(
 
     # --- Plots 1-3: Grown protocols ---
     sargs = dict(
-        title="", #Displacement (mm)",
+        title="",  # Displacement (mm)",
         vertical=True,
         title_font_size=22,
         label_font_size=20,
         shadow=False,
         n_labels=2,
         fmt="%.2f",
-        #height=0.5,
-        #width=0.2,
+        # height=0.5,
+        # width=0.2,
         position_x=0.75,
         position_y=0.25,
     )
@@ -169,9 +179,11 @@ def main(
         if camera_pos:
             plotter.camera_position = eval(camera_pos)
         else:
-            plotter.camera_position = camera_position  # Use the same view as the ungrown plot
+            plotter.camera_position = (
+                camera_position  # Use the same view as the ungrown plot
+            )
 
-        protocol_file = output_file.parent / f"_temp_{i+1}_{protocol}.png"
+        protocol_file = output_file.parent / f"_temp_{i + 1}_{protocol}.png"
         plotter.screenshot(protocol_file, scale=4, transparent_background=True)
         temp_files.append(protocol_file)
         plotter.close()

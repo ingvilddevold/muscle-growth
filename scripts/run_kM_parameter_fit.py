@@ -3,16 +3,18 @@ Script to run parameter fitting for kM (k1) using a cylinder geometry and
 the DeFreitas (MWF) protocol.
 """
 
-import musclex
-import dolfinx
-from musclex.exercise_model import ExerciseModel
-from musclex.protocol import DeFreitasProtocol
-from musclex.muscle_growth import MuscleGrowthModel
-from musclex.material import MuscleRohrle
 from pathlib import Path
+
+import dolfinx
 import pandas as pd
-from matplotlib import pyplot as plt
 import scienceplots
+from matplotlib import pyplot as plt
+
+import musclex
+from musclex.exercise_model import ExerciseModel
+from musclex.material import MuscleRohrle
+from musclex.muscle_growth import MuscleGrowthModel
+from musclex.protocol import DeFreitasProtocol
 
 # --- Setup ---
 

@@ -1,15 +1,16 @@
+import json
+from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-from pathlib import Path
 import typer
-from typing_extensions import Annotated
-from typing import List
-import json
-from matplotlib.lines import Line2D  # Import for custom legend
 
 # Matplotlib configuration
 from matplotlib import rc
+from matplotlib.lines import Line2D  # Import for custom legend
+from typing_extensions import Annotated
 
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
@@ -17,7 +18,7 @@ plt.rcParams["font.size"] = 7
 plt.rcParams["svg.fonttype"] = "none"
 rc("text", usetex=False)
 
-# Create a Typer application
+
 app = typer.Typer()
 
 

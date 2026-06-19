@@ -1,22 +1,34 @@
-import numpy as np
-import pandas as pd
 from pathlib import Path
-import typer
 
 import dolfinx
-from musclex.material import MuscleRohrle
+import numpy as np
+import pandas as pd
+import typer
+
 from musclex.geometry import IdealizedFusiform, RealisticGeometry
+from musclex.material import MuscleRohrle
 from musclex.utils import mpiprint
 
 app = typer.Typer()
 
+
 @app.command()
 def main(
-    output_dir: Path = typer.Option(..., "--output-dir", help="The directory to save the simulation results."),
-    material_config_path: Path = typer.Option(..., "--material-config", help="Path to the material configuration YAML file."),
+    output_dir: Path = typer.Option(
+        ..., "--output-dir", help="The directory to save the simulation results."
+    ),
+    material_config_path: Path = typer.Option(
+        ..., "--material-config", help="Path to the material configuration YAML file."
+    ),
     mesh_name: str = typer.Option(..., "--mesh-name", help="Mesh name."),
-    mesh_path: Path = typer.Option(..., "--mesh-path", help="Path to the directory containing the mesh files."),
-    is_realistic: bool = typer.Option(True, "--is-realistic/--no-is-realistic", help="Flag to indicate if the mesh is realistic or idealized."),
+    mesh_path: Path = typer.Option(
+        ..., "--mesh-path", help="Path to the directory containing the mesh files."
+    ),
+    is_realistic: bool = typer.Option(
+        True,
+        "--is-realistic/--no-is-realistic",
+        help="Flag to indicate if the mesh is realistic or idealized.",
+    ),
 ):
     """
     Runs an active contraction simulation for a given muscle geometry.
@@ -47,7 +59,7 @@ def main(
         material_config_path,
         geometry.fibers,
         output_dir,
-        clamp_type="robin"
+        clamp_type="robin",
     )
     material_model.setup_solver()
 
@@ -67,10 +79,7 @@ def main(
     # Create a dictionary for the DataFrame
     mpiprint("len(forces): ", len(forces))
     mpiprint("len(activation_levels): ", len(activation_levels))
-    results_data = {
-        "activation": activation_levels[:len(forces)],
-        "force": forces
-    }
+    results_data = {"activation": activation_levels[: len(forces)], "force": forces}
     results_df = pd.DataFrame(results_data)
 
     # Define the output file path
@@ -81,7 +90,7 @@ def main(
 
     # Save activation levels as a numpy file for reference
     output_npy = output_dir / "activation_levels.npy"
-    np.save(output_npy, activation_levels[:len(forces)])
+    np.save(output_npy, activation_levels[: len(forces)])
 
     mpiprint(f"Force-activation results saved successfully to {output_csv}")
     mpiprint("\n--- Final Results ---")

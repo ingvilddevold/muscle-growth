@@ -4,9 +4,10 @@ protocols and saves the ODE solutions to CSV files. It is intended to be called
 from a Snakemake rule.
 """
 
-from musclex.protocol import DeFreitasProtocol, RegularExercise
-from musclex.exercise_model import ExerciseModel
 from pathlib import Path
+
+from musclex.exercise_model import ExerciseModel
+from musclex.protocol import DeFreitasProtocol, RegularExercise
 
 # --- Protocol Definitions ---
 protocols = {

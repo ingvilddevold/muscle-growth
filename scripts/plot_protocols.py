@@ -14,19 +14,19 @@ day_weekly = [0]  # Mon
 
 # Setup figure
 fig, ax = plt.subplots(figsize=(2.0, 1.2))
-plt.subplots_adjust(right=0.6) # make room for legend
+plt.subplots_adjust(right=0.6)  # make room for legend
 
 # Colors
-c_mwf = '#5e81ac'      # Muted Blue
-c_every3 = '#a3be8c'   # Muted Green
-c_weekly = '#d08770'   # Muted Orange
+c_mwf = "#5e81ac"  # Muted Blue
+c_every3 = "#a3be8c"  # Muted Green
+c_weekly = "#d08770"  # Muted Orange
 
 # --- Plotting ---
 
 # 1. "Every three days"
 ax.bar(
     days_every3,
-    20, # 20% intensity
+    20,  # 20% intensity
     color=c_every3,
     alpha=1.0,
     width=0.6,
@@ -73,8 +73,8 @@ ax.set_yticks([])
 ax.set_ylabel("Intensity", fontsize=8, labelpad=0, color="black")
 
 # Legend - Center Right
-from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 legend_elements = [
     Patch(facecolor=c_mwf, label="MWF"),
@@ -88,9 +88,9 @@ legend_elements = [
     ),
 ]
 legend_elements = [
-    Line2D([0], [0], color=c_mwf, lw=3, label='MWF'),
-    Line2D([0], [0], color=c_every3, lw=3, label='Every three\ndays'),
-    Line2D([0], [0], color=c_weekly, lw=3, linestyle=':', label='Weekly')
+    Line2D([0], [0], color=c_mwf, lw=3, label="MWF"),
+    Line2D([0], [0], color=c_every3, lw=3, label="Every three\ndays"),
+    Line2D([0], [0], color=c_weekly, lw=3, linestyle=":", label="Weekly"),
 ]
 
 # Position legend to the right of the plot
@@ -105,6 +105,6 @@ ax.legend(
 )
 
 # Save
-#plt.savefig("exercise_protocols_conceptual.png", dpi=300, bbox_inches="tight")
+# plt.savefig("exercise_protocols_conceptual.png", dpi=300, bbox_inches="tight")
 plt.savefig("exercise_protocols_conceptual.svg", bbox_inches="tight")
 plt.show()

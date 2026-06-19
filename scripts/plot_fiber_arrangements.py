@@ -1,11 +1,13 @@
-import pyvista as pv
-import numpy as np
 from pathlib import Path
-import musclex
-import matplotlib.pyplot as plt
+
 import matplotlib.gridspec as gridspec
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
+import pyvista as pv
 from scipy.spatial.transform import Rotation as R
+
+import musclex
 
 # --- Configuration ---
 mesh_root_directory = Path(__file__).parents[1] / "meshes"
@@ -87,7 +89,6 @@ def process_meshes(root_dir):
 
     # Recursively find all .xdmf files in the mesh_root_directory
     for xdmf_path in root_dir.rglob("*.xdmf"):
-
         # 1. Construct expected fiber file path
         # Assumes naming convention: Name.xdmf -> Name_fibers.bp
         fiber_path = xdmf_path.parent / f"{xdmf_path.stem}_fibers.bp"
@@ -217,7 +218,6 @@ def assemble_wide_panel_c():
     outer_grid = gridspec.GridSpec(1, 3, width_ratios=[1, 1, 1], wspace=0.01)
 
     for group_idx, (muscle_label, muscle_key) in enumerate(muscle_groups):
-
         # Create a sub-grid for this muscle (1 Row, 4 Columns for subjects)
         inner_grid = gridspec.GridSpecFromSubplotSpec(
             1, 4, subplot_spec=outer_grid[group_idx], wspace=0.0
@@ -231,7 +231,6 @@ def assemble_wide_panel_c():
         # title_ax.set_title(muscle_label, fontsize=14, fontweight='bold', pad=20)
 
         for subj_idx, (subj_label, subj_key) in enumerate(subjects):
-
             ax = fig.add_subplot(inner_grid[0, subj_idx])
 
             # Find and Load

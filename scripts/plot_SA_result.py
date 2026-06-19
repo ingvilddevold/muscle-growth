@@ -20,10 +20,10 @@ def plot_sa_scatter(ax, sa_results_csv):
 
     # Convert confidence intervals to standard deviation through Z-score
     from scipy.stats import norm
+
     conf_level = 0.95
     Z = norm.ppf(0.5 + conf_level / 2)
     ST_std = ST_conf / Z
-
 
     COLORS = {
         "igf1": "#D8CC39",
@@ -108,7 +108,7 @@ def plot_sa_scatter(ax, sa_results_csv):
     # --- Plotting ---
     for i, name in enumerate(filtered_parameter_names):
         groups = list(param_to_groups.get(name, set()))
-        #x, y = filtered_indices[i], filtered_confidences[i]
+        # x, y = filtered_indices[i], filtered_confidences[i]
         x, y = filtered_indices[i], filtered_sd[i]
         s = 30  # marker size
         if len(groups) == 2:
