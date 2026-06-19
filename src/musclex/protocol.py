@@ -158,7 +158,7 @@ class SingleExercise(ExerciseProtocol):
 
 
 class DeFreitasProtocol(ExerciseProtocol):
-    def __init__(self):
+    def __init__(self, N_weeks: int = 8):
         """Exercise protocol matching the experiments in De Freitas et al 2011.
 
         First two weeks without exercise, then exercise for one hour at 80% intensity
@@ -169,7 +169,7 @@ class DeFreitasProtocol(ExerciseProtocol):
         t_ex = 24 * 7  # start of first exercise session
 
         self.add_event(GrowthEvent(0, 24 * 7))  # one resting week prior to exercise
-        for w in range(8):
+        for w in range(N_weeks):
             week = 7 * 24 * w + t_ex  # start of the week
             day = 24
             self.add_event(ExerciseEvent(week, week + 1))  # day 1
