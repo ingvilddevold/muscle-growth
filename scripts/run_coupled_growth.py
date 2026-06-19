@@ -34,6 +34,7 @@ protocols = {
         initial_rest=7 * 24,
         intensity=0.2,
     ),
+    "long": DeFreitasProtocol(N_weeks=16),
     "oneweek": RegularExercise(
         N=7,
         exercise_duration=1,
