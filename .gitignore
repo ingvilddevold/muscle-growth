@@ -5,7 +5,7 @@ lib/
 build/
 *.egg-info/
 
-results/
+results*/
 
 # Slurm output files
 *.err
