@@ -100,11 +100,9 @@ rule runMechanicsSimulation:
         "musclex"
     resources:
         time="01:00:00",
-        ntasks=32,
     shell:
         """
-        export OMP_NUM_THREADS=1 && \
-        mpirun -n {resources.ntasks} python -u {SCRIPT_DIR}/run_contraction.py \
+        python -u {SCRIPT_DIR}/run_contraction.py \
             --output-dir {output} \
             --material-config {input.config} \
             --mesh-name {params.mesh_name} \
@@ -148,12 +146,11 @@ rule runGrowthSimulation:
     conda:
         "musclex"
     resources:
-        time="02:00:00",
-        ntasks=32,
+        time="08:00:00",
+        #ntasks=32,
     shell:
         """
-        export OMP_NUM_THREADS=1 && \
-        mpirun -n {resources.ntasks} python {SCRIPT_DIR}/run_coupled_growth.py \
+        python {SCRIPT_DIR}/run_coupled_growth.py \
             --exercise-config {input.exercise_config} \
             --material-config {input.material_config} \
             --mesh-path {params.mesh_path} \
