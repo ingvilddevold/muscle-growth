@@ -384,7 +384,7 @@ class MuscleRohrle:
                 "snes_stol": 1e-10,
                 "snes_max_it": 20,
                 "snes_type": "newtonls",
-                "snes_linesearch_type": "none",
+                "snes_linesearch_type": "bt" if Fg else "none",
                 #"snes_monitor": None, # monitor for nonlinear solver
                 #"ksp_monitor": None, # monitor for linear solver
             }
