@@ -72,7 +72,7 @@ rule runGrowthSimulation:
     wildcard_constraints:
         protocol=PROTOCOL,
     conda:
-        "musclex2"
+        "musclex"
     resources:
         time=lambda wildcards: RESOURCES[wildcards.mesh]["time"],
         ntasks=lambda wildcards: RESOURCES[wildcards.mesh]["ntasks"],
@@ -98,7 +98,7 @@ rule plotMeshConvergence:
     params:
         labels="|".join(LEGEND_LABELS), 
     conda:
-        "musclex2"
+        "musclex"
     shell:
         """
         python {input.script} \
