@@ -1,12 +1,13 @@
-import dolfinx
-import numpy as np
-import adios4dolfinx
-import yaml
-import scipy.integrate
-from musclex.protocol import ExerciseProtocol, Event
-from musclex.utils import mpiprint
 from pathlib import Path
 
+import adios4dolfinx
+import dolfinx
+import numpy as np
+import scipy.integrate
+import yaml
+
+from musclex.protocol import Event, ExerciseProtocol
+from musclex.utils import mpiprint
 
 DEFAULT_VARIATION_PARAMETERS = [
     "a10",
@@ -43,7 +44,7 @@ class SpatialExerciseModel:
         output_dir: Path,
         variation_magnitude: float = 0.1,
         spatially_varied_parameters: list[str] = DEFAULT_VARIATION_PARAMETERS,
-        seed: int=42,
+        seed: int = 42,
         write_freq: int = 20,
     ):
         """
@@ -104,8 +105,11 @@ class SpatialExerciseModel:
 
         # Store functions to save
         self.state_functions = {
-            "igf1": self.x1, "akt": self.x2, "foxo": self.x3,
-            "mtor": self.x4, "z": self.z
+            "igf1": self.x1,
+            "akt": self.x2,
+            "foxo": self.x3,
+            "mtor": self.x4,
+            "z": self.z,
         }
 
         # Set initial conditions
@@ -122,7 +126,6 @@ class SpatialExerciseModel:
             param_func = dolfinx.fem.Function(self.V_ode, name=name)
 
             if name in self.spatially_varied_parameters:
-
                 # Define the spatial variation (random noise around the baseline)
                 # Draw num_cells samples from uniform(-1, 1)
                 random_noise = (np.random.rand(num_cells) - 0.5) * 2
@@ -145,11 +148,12 @@ class SpatialExerciseModel:
     def _save_spatial_parameters(self, output_dir: Path):
         """Saves the spatially varied parameters to a CSV file."""
         import pandas as pd
+
         data = {}
         for name in self.spatially_varied_parameters:
             if name in self.param_funcs:
                 data[name] = self.param_funcs[name].x.array
-            
+
         df = pd.DataFrame(data)
         output_file = output_dir / "spatial_parameters.csv"
         df.to_csv(output_file, index=False)
@@ -160,9 +164,7 @@ class SpatialExerciseModel:
         filepath = output_dir / "spatial_parameters.bp"
         adios4dolfinx.write_mesh(filepath, self.domain)
         for name, func in self.param_funcs.items():
-            adios4dolfinx.write_function(
-                filepath, func, time=0.0
-            )
+            adios4dolfinx.write_function(filepath, func, time=0.0)
 
     def _set_initial_conditions(self):
         """
@@ -196,8 +198,8 @@ class SpatialExerciseModel:
         """
         Intrinsic growth rate of x1 / IGF1 with explicit 12h time delay.
         """
-        #a1_val = self.base_params["a10"]  # baseline value
-        a1_vals = self.param_funcs["a10"].x.array # baseline values (non-exercise)
+        # a1_val = self.base_params["a10"]  # baseline value
+        a1_vals = self.param_funcs["a10"].x.array  # baseline values (non-exercise)
         for e in self.protocol.events:
             # Check if t is within an exercise session
             if e.start_time <= t <= e.end_time and e.exercise:
@@ -210,7 +212,7 @@ class SpatialExerciseModel:
         """
         Intrinsic growth rate of x2 / AKT.
         """
-        #a20 = self.base_params["a20"]
+        # a20 = self.base_params["a20"]
         a20 = self.param_funcs["a20"].x.array
         t1 = self.base_params["t1"]
         tau_h = self.base_params["tau_h"]
@@ -222,9 +224,11 @@ class SpatialExerciseModel:
         else:
             # Integrate from start of latest exercise to current time
             a2_int, _ = scipy.integrate.quad(
-                lambda t_prime: 0.5
-                * (-1 / tau_h - (t_prime - t_ex - t1) / tau_h**2)
-                * np.exp((t_prime - t_ex - t1) / tau_h),
+                lambda t_prime: (
+                    0.5
+                    * (-1 / tau_h - (t_prime - t_ex - t1) / tau_h**2)
+                    * np.exp((t_prime - t_ex - t1) / tau_h)
+                ),
                 t_ex,
                 t,
             )
@@ -382,7 +386,7 @@ class SpatialExerciseModel:
                 for name, func in self.state_functions.items():
                     adios4dolfinx.write_function(self.bp_file_path, func, time=self.t)
                 ode_output_times.append(self.t)
-        
+
         # Convert lists to arrays
         for key in history:
             if key == "t":
@@ -412,7 +416,7 @@ class SpatialExerciseModel:
         # --- Save Initial State (t=0) ---
         current_time = 0.0
         for name, func in self.state_functions.items():
-             adios4dolfinx.write_function(self.bp_file_path, func, time=current_time)
+            adios4dolfinx.write_function(self.bp_file_path, func, time=current_time)
         times.append(current_time)
 
         for event in self.protocol.events:
@@ -425,25 +429,26 @@ class SpatialExerciseModel:
                 self.get_f_rate(t + self.dt)
                 current_time = self.t
                 times.append(current_time)
-                
+
                 # --- Save current state ---
                 for name, func in self.state_functions.items():
                     # Append data for the current time step
-                    adios4dolfinx.write_function(self.bp_file_path, func, time=current_time)
+                    adios4dolfinx.write_function(
+                        self.bp_file_path, func, time=current_time
+                    )
 
         # write ode times to npy
         print(f"Saving ODE time steps to: {self.output_dir / 'ode_times.npy'}")
         print(f"Number of time steps: {len(times)}")
         np.save(self.output_dir / "ode_times.npy", np.array(times))
-        
-        return np.array(times)
 
+        return np.array(times)
 
     def assemble_and_save_results(self, events: list, output_dir: Path):
         """
         Assembles the full solution from all event solutions and saves the
         results to Parquet files in the specified directory.
-        
+
         Saves data in a 'long' format (time, cell, value) for fast plotting.
         """
         import pandas as pd
@@ -452,13 +457,11 @@ class SpatialExerciseModel:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Initialize lists to hold the concatenated data from all events
-        full_history = {
-            "t": [], "igf1": [], "akt": [], "foxo": [], "mtor": [], "z": []
-        }
-        
+        full_history = {"t": [], "igf1": [], "akt": [], "foxo": [], "mtor": [], "z": []}
+
         # Loop through events and concatenate their solutions
         for event in events:
-            if event.solution and event.solution['t'].size > 0:
+            if event.solution and event.solution["t"].size > 0:
                 full_history["t"].append(event.solution["t"])
                 full_history["igf1"].append(event.solution["igf1"])
                 full_history["akt"].append(event.solution["akt"])
@@ -468,7 +471,7 @@ class SpatialExerciseModel:
 
         # Concatenate lists of arrays into single arrays
         time_vector = np.concatenate(full_history["t"])
-        
+
         # Get the number of cells from the first data matrix
         if "z" in full_history and len(full_history["z"]) > 0:
             num_cells = full_history["z"][0].shape[1]
@@ -479,33 +482,32 @@ class SpatialExerciseModel:
             return
 
         for key in ["igf1", "akt", "foxo", "mtor", "z"]:
-            
             if not full_history[key]:
                 mpiprint(f"No data for '{key}', skipping.")
                 continue
 
             # Concatenate along the time axis (axis 0)
             data_matrix = np.concatenate(full_history[key], axis=0)
-            
+
             # 1. Create a DataFrame in WIDE format (time, '0', '1', '2', ...)
             df_wide = pd.DataFrame(data_matrix, columns=cell_column_names)
             df_wide.insert(0, "time", time_vector)
-            
+
             # 2. Melt the DataFrame to LONG format
             mpiprint(f"Melting data for '{key}'...")
             df_long = df_wide.melt(
-                id_vars=['time'],
-                var_name='cell',
-                value_name=key  # The value column will be named 'z', 'igf1', etc.
+                id_vars=["time"],
+                var_name="cell",
+                value_name=key,  # The value column will be named 'z', 'igf1', etc.
             )
-            
+
             # Convert cell column to integer for better storage/lookup
-            df_long['cell'] = df_long['cell'].astype(int)
-            
+            df_long["cell"] = df_long["cell"].astype(int)
+
             # 3. Define the Parquet output path
             output_path = output_dir / f"ode_spatial_{key}.parquet"
-            
+
             # 4. Save the new LONG DataFrame to Parquet
-            df_long.to_parquet(output_path, index=False, engine='pyarrow')
-            
+            df_long.to_parquet(output_path, index=False, engine="pyarrow")
+
             mpiprint(f"Saved LONG format history for {key} to {output_path}")

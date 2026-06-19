@@ -1,16 +1,16 @@
-import dolfinx
-from mpi4py import MPI
-from petsc4py import PETSc
-import ufl
+import typing
+from pathlib import Path
+from typing import NamedTuple
+
 import adios4dolfinx
-#import pyvista
+import dolfinx
 import dolfinx.plot as plot
 import numpy as np
-from pathlib import Path
-import typing
-from typing import NamedTuple
-from musclex.utils import get_interpolation_points
+import ufl
+from mpi4py import MPI
+from petsc4py import PETSc
 
+from musclex.utils import get_interpolation_points
 
 mesh_folder = Path(__file__).parents[2] / "meshes"
 
@@ -117,9 +117,10 @@ class Geometry:
             fiber_streamlines: If True, uses streamlines to visualize the fiber field.
             glyph_subsampling: Subsampling factor for glyphs (e.g., 10 means plot every 10th glyph).
         """
-        from matplotlib.colors import ListedColormap
         import pyvista
-        #pyvista.start_xvfb()
+        from matplotlib.colors import ListedColormap
+
+        # pyvista.start_xvfb()
         pyvista.global_theme.camera.viewup = [0, 0, 1]
 
         tdim = self.domain.topology.dim
@@ -167,10 +168,12 @@ class Geometry:
         # Determine points for glyphing (subsample if requested)
         if glyph_subsampling > 1 and not fiber_streamlines:
             points_to_glyph = pyvista.PolyData(fiber_grid.points[::glyph_subsampling])
-            points_to_glyph["fibers"] = fiber_grid.point_data["fibers"][::glyph_subsampling]
+            points_to_glyph["fibers"] = fiber_grid.point_data["fibers"][
+                ::glyph_subsampling
+            ]
         else:
             points_to_glyph = fiber_grid
-        
+
         domain_size = np.linalg.norm(
             np.array(fiber_grid.bounds[1::2]) - np.array(fiber_grid.bounds[::2])
         )
@@ -227,7 +230,7 @@ class Geometry:
                     scalars=facet_values,
                     show_edges=True,
                     cmap=cmap,
-                    opacity=1.0, #0.7,
+                    opacity=1.0,  # 0.7,
                     clim=[0, 3],
                     show_scalar_bar=False,
                 )
@@ -257,7 +260,6 @@ class Geometry:
                         line_width=3,
                     )
                 else:
-
                     plotter.add_mesh(
                         glyphs,
                         name="fiber_glyphs",
@@ -268,11 +270,11 @@ class Geometry:
                 raise ValueError(f"Unknown plot mode: {m}")
 
             # Reduce surrounding space
-            #plotter.view_yz()
-            #plotter.camera.tight(view="yz", padding=padding, adjust_render_window=False)
+            # plotter.view_yz()
+            # plotter.camera.tight(view="yz", padding=padding, adjust_render_window=False)
 
             # Adjust camera angle to see planes in the xy-plane
-            #plotter.camera.elevation = 30
+            # plotter.camera.elevation = 30
             plotter.view_yz()
             plotter.camera.zoom(1.5)
 
@@ -510,7 +512,7 @@ class RealisticGeometry(Geometry):
             thickness (float, optional): Thickness for the box method. Defaults to 1e-4.
         """
         from musclex import intersection
-        
+
         muscle_mesh = self.domain
 
         if method == "plane":
@@ -594,32 +596,42 @@ class RealisticGeometry(Geometry):
             )
 
         import pyvista
+
         # Create a plotter
         plotter = pyvista.Plotter()
-        plotter.add_text("Muscle with CSA Cutting Surface\n(Intersecting cells in yellow)", position='upper_left', font_size=10)
+        plotter.add_text(
+            "Muscle with CSA Cutting Surface\n(Intersecting cells in yellow)",
+            position="upper_left",
+            font_size=10,
+        )
 
         # 1. Get the muscle mesh and convert to a PyVista grid
         muscle_mesh = self.domain
         topo_muscle, cell_types_muscle, geom_muscle = dolfinx.plot.vtk_mesh(muscle_mesh)
-        grid_muscle = pyvista.UnstructuredGrid(topo_muscle, cell_types_muscle, geom_muscle)
+        grid_muscle = pyvista.UnstructuredGrid(
+            topo_muscle, cell_types_muscle, geom_muscle
+        )
 
         # Add the muscle mesh to the plotter with some transparency
-        plotter.add_mesh(grid_muscle, style='surface', color='lightgray', opacity=0.5)
+        plotter.add_mesh(grid_muscle, style="surface", color="lightgray", opacity=0.5)
 
         # 2. Get the cutting surface mesh and convert to a PyVista grid
-        topo_surface, cell_types_surface, geom_surface = dolfinx.plot.vtk_mesh(self.cutting_surface)
-        grid_surface = pyvista.UnstructuredGrid(topo_surface, cell_types_surface, geom_surface)
+        topo_surface, cell_types_surface, geom_surface = dolfinx.plot.vtk_mesh(
+            self.cutting_surface
+        )
+        grid_surface = pyvista.UnstructuredGrid(
+            topo_surface, cell_types_surface, geom_surface
+        )
 
         # Add the full cutting surface mesh to the plotter with a distinct color and some transparency
-        plotter.add_mesh(grid_surface, color='red', show_edges=True, opacity=0.3)
+        plotter.add_mesh(grid_surface, color="red", show_edges=True, opacity=0.3)
 
         # 3. Extract and highlight the actual intersecting cells on the cutting surface
         if self.intersecting_cells is not None and len(self.intersecting_cells) > 0:
             intersecting_grid = grid_surface.extract_cells(self.intersecting_cells)
-            plotter.add_mesh(intersecting_grid, color='yellow', show_edges=True)
+            plotter.add_mesh(intersecting_grid, color="yellow", show_edges=True)
         else:
             print("Warning: No intersecting cells found to highlight.")
-
 
         # 4. Show the plot
         plotter.view_isometric()
@@ -640,7 +652,7 @@ class RealisticGeometry(Geometry):
             raise RuntimeError(
                 "`setup_csa_surface()` must be called before `compute_csa()`."
             )
-      
+
         # --- Case 1: Undeformed CSA ---
         if u is None:
             # Integrate 1 over the pre-defined intersection measure (dx or ds)
@@ -656,7 +668,8 @@ class RealisticGeometry(Geometry):
             V_F_muscle = dolfinx.fem.functionspace(self.domain, ("DG", 1, (3, 3)))
             F_muscle = dolfinx.fem.Function(V_F_muscle)
             F_expr = dolfinx.fem.Expression(
-                ufl.Identity(3) + ufl.grad(u), get_interpolation_points(V_F_muscle.element)
+                ufl.Identity(3) + ufl.grad(u),
+                get_interpolation_points(V_F_muscle.element),
             )
             F_muscle.interpolate(F_expr)
 
@@ -665,14 +678,21 @@ class RealisticGeometry(Geometry):
             )
             F_plane = dolfinx.fem.Function(V_F_plane)
 
-            all_cells =  np.arange(self.cutting_surface.topology.index_map(self.cutting_surface.topology.dim).size_local, dtype=np.int32)
+            all_cells = np.arange(
+                self.cutting_surface.topology.index_map(
+                    self.cutting_surface.topology.dim
+                ).size_local,
+                dtype=np.int32,
+            )
 
             interp_data = dolfinx.fem.create_interpolation_data(
                 V_F_plane, V_F_muscle, self.intersecting_cells
             )
             F_plane.interpolate_nonmatching(
-                F_muscle, self.intersecting_cells, interp_data
-                #F_muscle, all_cells, interp_data
+                F_muscle,
+                self.intersecting_cells,
+                interp_data,
+                # F_muscle, all_cells, interp_data
             )
 
             J = ufl.det(F_plane)
@@ -712,9 +732,7 @@ class RealisticGeometry(Geometry):
 class CylinderGmsh(Geometry):
     def __init__(self):
         mesh_file = mesh_folder / "muscle-cylinder" / "muscle-cylinder.msh"
-        mesh_data = dolfinx.io.gmsh.read_from_msh(
-            mesh_file, MPI.COMM_WORLD, gdim=3
-        )
+        mesh_data = dolfinx.io.gmsh.read_from_msh(mesh_file, MPI.COMM_WORLD, gdim=3)
         domain = mesh_data.mesh
         facet_markers = mesh_data.facet_tags
 
@@ -821,7 +839,6 @@ class Cylinder(Geometry):
 
 
 class IdealizedFusiform(Geometry):
-
     def __init__(self, meshfile, fibersfile=None, comm=MPI.COMM_WORLD):
 
         # Read muscle mesh and facet tags from file
@@ -832,8 +849,8 @@ class IdealizedFusiform(Geometry):
             )
             self.ft = f.read_meshtags(domain, name="ft")
 
-        #tagfile = meshfile.with_name(meshfile.name.replace(".xdmf", "_ft.xdmf"))
-        #with dolfinx.io.XDMFFile(comm, tagfile, "r") as f:
+        # tagfile = meshfile.with_name(meshfile.name.replace(".xdmf", "_ft.xdmf"))
+        # with dolfinx.io.XDMFFile(comm, tagfile, "r") as f:
         #    self.ft = f.read_meshtags(domain, name="Grid")
 
         if fibersfile:

@@ -1,13 +1,12 @@
+from abc import ABC
+
 import dolfinx
 import dolfinx.fem.petsc
 import dolfinx.nls.petsc
-import ufl
-
 import numpy as np
-
+import ufl
 from mpi4py import MPI
 from petsc4py import PETSc
-from abc import ABC
 
 
 class MechanicsSolver(ABC):
@@ -96,9 +95,8 @@ class NonlinearPDE_SNESProblem:
 
     def F(self, snes, x, F):
         """Assemble residual vector."""
-        from petsc4py import PETSc
-
         from dolfinx.fem.petsc import apply_lifting, assemble_vector, set_bc
+        from petsc4py import PETSc
 
         x.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
         x.copy(self.u.x.petsc_vec)
@@ -115,20 +113,21 @@ class NonlinearPDE_SNESProblem:
 
     def J(self, snes, x, J, P):
         """Assemble Jacobian matrix."""
-        from petsc4py import PETSc
-
         from dolfinx.fem.petsc import assemble_matrix
+        from petsc4py import PETSc
 
         x.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
         x.copy(self.u.x.petsc_vec)
-        self.u.x.petsc_vec.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
+        self.u.x.petsc_vec.ghostUpdate(
+            addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD
+        )
 
         J.zeroEntries()
         assemble_matrix(J, self.a, bcs=self.bc)
         J.assemble()
 
-class SNESSolver(MechanicsSolver):
 
+class SNESSolver(MechanicsSolver):
     def __init__(self, L, u, bcs, set_nullspace=True):
         super().__init__(L, u, bcs)
 
@@ -152,7 +151,7 @@ class SNESSolver(MechanicsSolver):
         snes.getKSP().getPC().setFactorSolverType("mumps")
 
         snes.setMonitor(lambda _, it, residual: print("It:", it, "Residual:", residual))
-        
+
         opts = PETSc.Options()
         opts["snes_linesearch_type"] = "basic"  # no line search
         # opts["snes_linesearch_monitor"] = None
@@ -288,4 +287,3 @@ def build_nullspace(W):
 
     ns = PETSc.NullSpace().create(vectors=petsc_basis)
     return ns
-

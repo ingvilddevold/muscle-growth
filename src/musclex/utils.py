@@ -1,9 +1,9 @@
-from dolfinx import fem
-from packaging.version import Version
-import numpy as np
-from mpi4py import MPI
-import ufl
 import dolfinx
+import numpy as np
+import ufl
+from dolfinx import fem
+from mpi4py import MPI
+from packaging.version import Version
 from petsc4py import PETSc
 
 

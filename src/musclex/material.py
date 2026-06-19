@@ -1,33 +1,34 @@
-import dolfinx
-import basix
-import ufl
-import adios4dolfinx
-import adios2
-from mpi4py import MPI
-import yaml
-import musclex
-import numpy as np
+import tempfile
 import time
+from pathlib import Path
+
+import adios2
+import adios4dolfinx
+import basix
+import dolfinx
+import numpy as np
+import ufl
+import yaml
+from mpi4py import MPI
 from packaging.version import Version
 
-is_dolfinx_10_or_newer = Version(dolfinx.__version__) >= Version("0.10.0")
-
-from pathlib import Path
+import musclex
 from musclex.utils import get_interpolation_points, mpiprint
 
 tmpdir = Path(__file__).parents[1] / "results" / "tmp"
 
+
 # Unique temporary directory for caching
 # prevent race conditions when running multiple simulations in parallel
-import tempfile
-base_cache_dir = Path.home() / ".cache" / "fenics" 
+base_cache_dir = Path.home() / ".cache" / "fenics"
 base_cache_dir.mkdir(parents=True, exist_ok=True)
 cache_dir = tempfile.mkdtemp(dir=base_cache_dir, prefix="fenics_job_")
 jit_options = {"cache_dir": str(cache_dir)}
 
+is_dolfinx_10_or_newer = Version(dolfinx.__version__) >= Version("0.10.0")
+
 
 class MuscleRohrle:
-
     def __init__(
         self,
         domain: dolfinx.mesh.Mesh,
@@ -74,7 +75,7 @@ class MuscleRohrle:
         # Function space
         self.state_space = dolfinx.fem.functionspace(self.domain, mixed_element)
         mpiprint(
-            f"dofs: { self.state_space.dofmap.index_map.size_global * self.state_space.dofmap.index_map_bs}"
+            f"dofs: {self.state_space.dofmap.index_map.size_global * self.state_space.dofmap.index_map_bs}"
         )
 
         # Collapsed subspaces and dofmaps
@@ -195,7 +196,7 @@ class MuscleRohrle:
     def clamp_robin(self, R):
         """
         Applies Robin boundary conditions to represent elastic tendons at the muscle
-        ends (surfaces tagged 1 and 2). Also pins one point to prevent rigid 
+        ends (surfaces tagged 1 and 2). Also pins one point to prevent rigid
         body motion.
 
         Args:
@@ -211,12 +212,13 @@ class MuscleRohrle:
         J = ufl.det(F)
         cof = J * ufl.inv(F).T
         cofnorm = ufl.sqrt(ufl.dot(cof * N, cof * N))
-        NN = 1 / cofnorm * cof * N # unit normal in current configuration
+        NN = 1 / cofnorm * cof * N  # unit normal in current configuration
         nn = ufl.outer(NN, NN)
         value = -nn * self.k_tendon * self.u
         # Add the Robin boundary term to the weak form (residual).
-        R += - ufl.dot(value, self.v) * cofnorm * self.ds(1) \
-             - ufl.dot(value, self.v) * cofnorm * self.ds(2)
+        R += -ufl.dot(value, self.v) * cofnorm * self.ds(1) - ufl.dot(
+            value, self.v
+        ) * cofnorm * self.ds(2)
         mpiprint(f"Applying Robin BC with k={self.k_tendon.value}.")
 
         return R
@@ -240,12 +242,12 @@ class MuscleRohrle:
 
     def force_passive(self, I4):
         """Normalized passive fiber force. Given as a piecewise exponential function."""
-        
+
         # Threshold where linear behavior starts
         lim_linear = 1.4
         # Normalized stretch at the transition point
         l_star = lim_linear / self.lmbda_opt
-        
+
         # Normalized stretch (lmbda) and normalized stretch (l)
         lmbda = ufl.sqrt(I4)
         l = lmbda / self.lmbda_opt
@@ -337,7 +339,7 @@ class MuscleRohrle:
     def setup_solver(self, Fg=None):
         """Build the kinematics, weak form, and nonlinear solver ONCE."""
         mpiprint("Setting up nonlinear solver...")
-        
+
         ## --------- KINEMATICS --------- ##
         Id = ufl.Identity(self.domain.geometry.dim)
         F = Id + ufl.grad(self.u)
@@ -353,7 +355,9 @@ class MuscleRohrle:
         ## --------- MATERIAL MODEL --------- ##
         S = self.stress_PK2(self.alpha, Fe, self.p)  # Second Piola-Kirchhoff stress
         P = self.stress_PK1(S, Fe)  # First Piola-Kirchhoff stress
-        self.sigma = self.stress_Cauchy(P, Fe)  # Save Cauchy stress to instance for reuse
+        self.sigma = self.stress_Cauchy(
+            P, Fe
+        )  # Save Cauchy stress to instance for reuse
 
         ## --------- DEFINE RESIDUAL --------- ##
         R = ufl.inner(ufl.grad(self.v), P) * self.dx + self.q * (Je - 1) * self.dx
@@ -385,8 +389,8 @@ class MuscleRohrle:
                 "snes_max_it": 20,
                 "snes_type": "newtonls",
                 "snes_linesearch_type": "bt" if Fg else "none",
-                #"snes_monitor": None, # monitor for nonlinear solver
-                #"ksp_monitor": None, # monitor for linear solver
+                # "snes_monitor": None, # monitor for nonlinear solver
+                # "ksp_monitor": None, # monitor for linear solver
             }
             self.solver = dolfinx.fem.petsc.NonlinearProblem(
                 R,
@@ -401,9 +405,10 @@ class MuscleRohrle:
                 mpiprint(f"Iteration {its} residual: {rnorm}")
 
             self.solver.solver.setMonitor(monitor)
-            
+
             if self.clamp_type == "none":
                 from musclex.solvers import build_nullspace
+
                 nullspace = build_nullspace(self.state_space)
                 self.solver.A.setNullSpace(nullspace)
         else:
@@ -419,7 +424,7 @@ class MuscleRohrle:
         mpiprint("Starting simulation...")
         tic = time.perf_counter()
         for i, a in enumerate(activation_levels):
-            mpiprint(f"{'='*50}\nSolving for activation level {a}")
+            mpiprint(f"{'=' * 50}\nSolving for activation level {a}")
             self.alpha.value = a  # set activation level
 
             # Execute the lightweight solve

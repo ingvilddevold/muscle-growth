@@ -1,15 +1,16 @@
-import dolfinx
-import ufl
+from pathlib import Path
+
 import adios4dolfinx
+import dolfinx
+import imageio
 import numpy as np
 import pyvista
-from pathlib import Path
-from mpi4py import MPI
-from matplotlib import pyplot as plt
-import imageio
 import typer
-from musclex.utils import get_interpolation_points
+import ufl
+from matplotlib import pyplot as plt
+from mpi4py import MPI
 
+from musclex.utils import get_interpolation_points
 
 # Set pyvista font
 pyvista.global_theme.font.family = "arial"
@@ -127,7 +128,7 @@ class PostProcessor:
             u_space: Function space for the displacement data.
             time: Current time for annotation.
             camera_position: Optional camera position to apply to the plotter.
-        
+
         Returns:
             The camera position used by the plotter if no position was provided.
         """
@@ -198,13 +199,13 @@ class PostProcessor:
 
         plot_filename = plot_dir / f"time_{time:06.1f}.png"
         plotter.screenshot(plot_filename, transparent_background=True, scale=5)
-        
+
         # If no camera position was provided, return the one we generated
         if camera_position is None:
             final_camera_pos = plotter.camera_position
             plotter.close()
             return final_camera_pos
-        
+
         plotter.close()
 
     def _create_media_files(self):
@@ -269,7 +270,7 @@ class PostProcessor:
         # pyvista.start_xvfb()
 
         for i, time in enumerate(self.growth_times):
-            print(f"  - Processing frame {i+1}/{len(self.growth_times)}...")
+            print(f"  - Processing frame {i + 1}/{len(self.growth_times)}...")
 
             adios4dolfinx.read_function(self.results_file, u, time=time)
 
@@ -306,7 +307,7 @@ class PostProcessor:
             frame_data = cached_field_data[i]
             time = self.growth_times[i]
             print(
-                f"  - Plotting frame {i+1}/{len(cached_field_data)} (Time: {time:.3f})..."
+                f"  - Plotting frame {i + 1}/{len(cached_field_data)} (Time: {time:.3f})..."
             )
             for key in self.plot_quantities.keys():
                 plot_dir = self.postprocessed_dir / f"plots_{key}"
@@ -354,7 +355,7 @@ class PostProcessor:
             frame_data = cached_field_data[i]
             time = self.growth_times[i]
             print(
-                f"  - Plotting frame {i+1}/{len(cached_field_data)} (Time: {time:.3f})..."
+                f"  - Plotting frame {i + 1}/{len(cached_field_data)} (Time: {time:.3f})..."
             )
             for key in self.plot_quantities.keys():
                 plot_dir = self.postprocessed_dir / f"plots_{key}"
@@ -377,7 +378,7 @@ class PostProcessor:
             frame_data = cached_field_data[i]
             time = self.growth_times[i]
             print(
-                f"  - Plotting final frame {i+1}/{len(cached_field_data)} (Time: {time:.3f})..."
+                f"  - Plotting final frame {i + 1}/{len(cached_field_data)} (Time: {time:.3f})..."
             )
             for key in self.plot_quantities.keys():
                 # Set up output directory

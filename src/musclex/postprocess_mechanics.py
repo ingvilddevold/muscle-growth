@@ -1,14 +1,15 @@
-import dolfinx
-import ufl
+from pathlib import Path
+from typing import Annotated
+
 import adios4dolfinx
+import dolfinx
+import imageio
 import numpy as np
 import pyvista
-from pathlib import Path
-from mpi4py import MPI
-from matplotlib import pyplot as plt
-import imageio
 import typer
-from typing import Annotated
+import ufl
+from matplotlib import pyplot as plt
+from mpi4py import MPI
 
 from musclex.material import MuscleRohrle
 from musclex.utils import get_interpolation_points
@@ -22,7 +23,7 @@ from matplotlib import rc
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
 plt.rcParams["font.size"] = 8
-plt.rcParams['svg.fonttype'] = 'none'
+plt.rcParams["svg.fonttype"] = "none"
 rc("text", usetex=False)
 
 
@@ -193,10 +194,10 @@ class PostProcessor:
             position_y=0.3,
             # width=0.08,
             # height=0.4,
-            #position_x=0.3,
-            #position_y=0.01,
-            #width=0.4,
-            #height=0.1,
+            # position_x=0.3,
+            # position_y=0.01,
+            # width=0.4,
+            # height=0.1,
         )
 
         plotter = pyvista.Plotter(off_screen=True, window_size=[290, 312])
@@ -210,11 +211,11 @@ class PostProcessor:
         )
 
         # Annotate activation level
-        #plotter.add_text(
+        # plotter.add_text(
         #    f"Activation level: {activation_level:.2f}",
         #    position="top",
         #    font_size=20,
-        #)
+        # )
 
         if self.initial_camera_pos is None:
             plotter.view_yz()
@@ -311,7 +312,7 @@ class PostProcessor:
         p = dolfinx.fem.Function(self.material_local.Q, name="p")
 
         for i, activation in enumerate(self.activation_levels):
-            print(f"  - Processing frame {i+1}/{len(self.activation_levels)}...")
+            print(f"  - Processing frame {i + 1}/{len(self.activation_levels)}...")
 
             try:
                 adios4dolfinx.read_function(self.results_file, u, time=activation)
@@ -336,7 +337,7 @@ class PostProcessor:
                 import traceback
 
                 print(
-                    f"  - Error processing frame {i+1} (activation={activation}): {e}"
+                    f"  - Error processing frame {i + 1} (activation={activation}): {e}"
                 )
                 traceback.print_exc()
                 break
@@ -357,7 +358,7 @@ class PostProcessor:
             frame_data = cached_field_data[i]
             activation_level = self.activation_levels[i]
             print(
-                f"  - Plotting frame {i+1}/{len(cached_field_data)} (Activation: {activation_level:.3f})..."
+                f"  - Plotting frame {i + 1}/{len(cached_field_data)} (Activation: {activation_level:.3f})..."
             )
             for key in self.plot_quantities.keys():
                 self._generate_plot_frame(
@@ -373,7 +374,9 @@ class PostProcessor:
         # --- 3. Create media files ---
         self._create_media_files()
 
-        print(f"\nPost-processing complete. Videos and plots saved to: {self.postprocessed_dir}")
+        print(
+            f"\nPost-processing complete. Videos and plots saved to: {self.postprocessed_dir}"
+        )
 
 
 app = typer.Typer()

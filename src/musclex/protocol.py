@@ -90,7 +90,7 @@ class RegularExercise(ExerciseProtocol):
         exercise_duration: float,
         growth_duration: float,
         end_time: float,
-        intensity: float=0.8,
+        intensity: float = 0.8,
         initial_rest: float = 0.0,
     ):
         """Exercise protocol with num_exercise_sessions exercise events of exercise_duration hours each, and
@@ -129,7 +129,9 @@ class RegularExercise(ExerciseProtocol):
         self.events.pop()
         self.numEvents -= 1
         self.add_event(
-            GrowthEvent(t0 + i * growth_duration + (i + 1) * exercise_duration, end_time)
+            GrowthEvent(
+                t0 + i * growth_duration + (i + 1) * exercise_duration, end_time
+            )
         )
 
 
@@ -181,9 +183,9 @@ class DeFreitasProtocol(ExerciseProtocol):
 
 
 class RestProtocol(ExerciseProtocol):
-    def __init__(self, end_time=24*7*5):
+    def __init__(self, end_time=24 * 7 * 5):
         """Exercise protocol with no exercise.
-        
+
         Args:
             end_time (int, optional): Duration of the protocol in hours. Defaults to 5 weeks.
         """

@@ -1,4 +1,3 @@
-
 def hill_function(x, K_A=1.0, n=4, max_response=2):
     """Hill function"""
     L_pow_n = x**n

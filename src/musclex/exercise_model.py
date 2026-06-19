@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import dolfinx
-from musclex.protocol import Event, ExerciseProtocol
+import numpy as np
 import scipy
 import yaml
-import numpy as np
-from pathlib import Path
+
+from musclex.protocol import Event, ExerciseProtocol
 
 
 class ExerciseModel:
@@ -104,9 +106,11 @@ class ExerciseModel:
         else:
             # Integrate from start of last exercise session to current time
             a2_int, _ = scipy.integrate.quad(
-                lambda t: 0.5
-                * (-1 / tau_h - (t - t_ex - t1) / tau_h**2)
-                * np.exp((t - t_ex - t1) / tau_h),
+                lambda t: (
+                    0.5
+                    * (-1 / tau_h - (t - t_ex - t1) / tau_h**2)
+                    * np.exp((t - t_ex - t1) / tau_h)
+                ),
                 t_ex,
                 t,
             )
@@ -270,9 +274,7 @@ class ExerciseModel:
         # Calculate f_rate for each state returned by the solver
         f_rate_history = np.array(
             [self.f(state[2], state[3], state[4]) for state in solution.y.T]
-        ).reshape(
-            -1, 1
-        )  # Reshape to (n_steps, 1)
+        ).reshape(-1, 1)  # Reshape to (n_steps, 1)
 
         solution_dict = {"t": event_times, "f_rate": f_rate_history, "y": solution.y}
         return solution_dict
@@ -291,7 +293,6 @@ class ExerciseModel:
 
         # Solve for each event (exercise+growth period) separately
         for event in self.protocol.events:
-
             self.solve(
                 event,
                 self.y_prev,

@@ -1,18 +1,20 @@
-import dolfinx
-import adios4dolfinx
-import musclex
-import ufl
-import numpy as np
-import pandas as pd
 import time
 from pathlib import Path
-from mpi4py import MPI
+
+import adios4dolfinx
+import dolfinx
+import numpy as np
+import pandas as pd
+import ufl
 import yaml
-from musclex.utils import get_interpolation_points, mpiprint
+from mpi4py import MPI
+
+import musclex
 from musclex.feedback import hill_feedback, linear_feedback
+from musclex.utils import get_interpolation_points, mpiprint
+
 
 class MuscleGrowthModel:
-
     def __init__(
         self,
         exercise_model,
@@ -21,7 +23,7 @@ class MuscleGrowthModel:
         csa_function,
         feedback="hill",
         output_freq: int = 10,
-        dt_growth: float = 1.0
+        dt_growth: float = 1.0,
     ):
         """Initialize the coupled exercise-mechanics model.
         Args:
@@ -204,7 +206,7 @@ class MuscleGrowthModel:
         # --- Event-based outer loop ---
         for event in self.exercise_model.protocol.events:
             mpiprint(
-                f"\n{'='*70}\nProcessing event from t={event.start_time} to {event.end_time}"
+                f"\n{'=' * 70}\nProcessing event from t={event.start_time} to {event.end_time}"
             )
 
             # --- ODE solve ---
@@ -226,7 +228,6 @@ class MuscleGrowthModel:
 
             # Iterate over growth time steps
             for i, t_growth in enumerate(growth_times):
-
                 # --- Find growth rate at this time step ---
                 # Find the index in the signaling history closest to the current growth time
                 idx = np.argmin(np.abs(signal_times - t_growth))
@@ -273,9 +274,10 @@ class MuscleGrowthModel:
                 else:
                     k1_history.append(self.exercise_model.params["k1"])
 
-
                 local_volume = dolfinx.fem.assemble_scalar(volume_form)
-                volume = self.material_model.domain.comm.allreduce(local_volume, op=MPI.SUM)
+                volume = self.material_model.domain.comm.allreduce(
+                    local_volume, op=MPI.SUM
+                )
                 volumes_history.append(volume)
 
                 # --- Write output ---
@@ -288,7 +290,6 @@ class MuscleGrowthModel:
                 csa_new = csas_history[-1]  # Use the most recent CSA
                 self.csa.value = csa_new
                 feedback_scalar = self.feedback_function(csa_new / self.csa0)
-
 
                 if self.is_spatial:
                     k1_feedback_field.x.array[:] = feedback_scalar * k10.x.array
