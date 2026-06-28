@@ -241,28 +241,24 @@ class MuscleRohrle:
         )
 
     def force_passive(self, I4):
-        """Normalized passive fiber force. Given as a piecewise exponential function."""
-
-        # Threshold where linear behavior starts
-        lim_linear = 1.4
-        # Normalized stretch at the transition point
-        l_star = lim_linear / self.lmbda_opt
-
-        # Normalized stretch (lmbda) and normalized stretch (l)
+        """Normalized passive fiber force."""
         lmbda = ufl.sqrt(I4)
-        l = lmbda / self.lmbda_opt
 
-        # Compute the continuity coefficients gamma_3 and gamma_4
-        g3 = self.g1 * self.g2 * ufl.exp(self.g2 * (l_star - 1.0))
-        g4 = self.g1 * (ufl.exp(self.g2 * (l_star - 1.0)) - 1.0) - (g3 * l_star)
+        # Fiber stretch threshold where linear behavior starts
+        lim_linear = 1.4  
+        
+        # Compute the continuity coefficients g3 (slope) and g4 (intercept)
+        # to guarantee C0/C1 continuity
+        g3 = self.g1 * self.g2 * ufl.exp(self.g2 * (lim_linear - 1.0))
+        g4 = self.g1 * (ufl.exp(self.g2 * (lim_linear - 1.0)) - 1.0) - (g3 * lim_linear)
 
         # Define exponential and linear expressions
-        f_p1 = self.g1 * (ufl.exp(self.g2 * (l - 1.0)) - 1.0)
-        f_p2 = g3 * l + g4
+        f_p1 = self.g1 * (ufl.exp(self.g2 * (lmbda - 1.0)) - 1.0)
+        f_p2 = g3 * lmbda + g4
 
         # Return piecewise function
         return ufl.conditional(
-            ufl.le(lmbda, self.lmbda_opt),
+            ufl.le(lmbda, 1.0),
             0.0,
             ufl.conditional(
                 ufl.le(lmbda, lim_linear),
