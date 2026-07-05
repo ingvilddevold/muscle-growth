@@ -1,18 +1,20 @@
-import typer
-import numpy as np
-import dolfinx
-import ufl
-import adios4dolfinx
-from mpi4py import MPI
-import pyvista as pv
 from pathlib import Path
+
+import adios4dolfinx
+import dolfinx
+import matplotlib.pyplot as plt
+import numpy as np
+import pyvista as pv
+import typer
+import ufl
+
+from matplotlib import rc
+from mpi4py import MPI
 from typing_extensions import Annotated
+
 from musclex.utils import get_interpolation_points
 
 # --- Matplotlib Styling ---
-from matplotlib import rc
-import matplotlib.pyplot as plt
-
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial"]
 plt.rcParams["font.size"] = 8
@@ -179,7 +181,9 @@ def main(
     # --- 2. Determine shared color limits ---
     z_clim = np.percentile(all_z_values, [2, 98]) if all_z_values else [0, 1]
     J_clim = np.percentile(all_J_values, [2, 98]) if all_J_values else [0, 1]
-    disp_clim = np.percentile(all_disp_mag_values, [2, 98]) if all_disp_mag_values else [0, 1]
+    disp_clim = (
+        np.percentile(all_disp_mag_values, [2, 98]) if all_disp_mag_values else [0, 1]
+    )
     for clim in [z_clim, J_clim, disp_clim]:
         if clim[0] == clim[1]:
             clim[1] += 1e-9
@@ -187,9 +191,9 @@ def main(
     # --- 3. Define Plot Settings ---
     quantities = ["z", "J", "u_mag"]
     titles = {
-        "z": "", #"Final N",
-        "J": "", #"Final J",
-        "u_mag": "", #"Final Disp. Mag.",
+        "z": "",  # "Final N",
+        "J": "",  # "Final J",
+        "u_mag": "",  # "Final Disp. Mag.",
     }
     cmaps = {"z": "Blues", "J": "Greens", "u_mag": "viridis"}
     clims = {"z": z_clim, "J": J_clim, "u_mag": disp_clim}
@@ -240,9 +244,9 @@ def main(
                     grid_dg0.cell_data[qty] = all_data[label][data_keys[qty]]
 
                     grid_p2 = base_grid_P2.copy()
-                    grid_p2.point_data["u"] = all_data[label][
-                        "u_vec_data"
-                    ].reshape(grid_p2.n_points, -1)
+                    grid_p2.point_data["u"] = all_data[label]["u_vec_data"].reshape(
+                        grid_p2.n_points, -1
+                    )
                     warped_grid = grid_p2.warp_by_vector("u", factor=warp_scale)
                     warped_grid.cell_data[qty] = all_data[label][data_keys[qty]]
                     grid_to_plot = warped_grid
@@ -265,15 +269,19 @@ def main(
                     )
                     plotter.camera_position = camera_pos
                     # Add title for the individual plot
-                    #plotter.add_text(
+                    # plotter.add_text(
                     #    f"{label.capitalize()}: {titles[qty]}",
                     #    font="arial",
                     #    position="upper_center",
                     #    font_size=12,
-                    #)
+                    # )
 
                 # --- Save the individual plot ---
-                output_path = sim_dir.parent / (sim_dir.stem + "_postprocessed") / f"{qty}_final_plot.png"
+                output_path = (
+                    sim_dir.parent
+                    / (sim_dir.stem + "_postprocessed")
+                    / f"{qty}_final_plot.png"
+                )
 
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 plotter.screenshot(output_path, scale=3)
@@ -282,105 +290,100 @@ def main(
 
         print(f"\nSuccessfully saved all individual plots.")
 
-    else:
-        # --- 5b. Create the Grid Plot (Original Logic) ---
-        print(f"Saving grid plot to {output_file}...")
-        n_cols_total = n_sims + 1  # Add one column for scalar bars
-        plotter = pv.Plotter(
-            shape=(3, n_cols_total),
-            window_size=[150 * n_cols_total, 800],
-            off_screen=True,
-            border=False,
-        )
+    # --- 5b. Create the Grid Plot ---
+    print(f"Saving grid plot to {output_file}...")
+    n_cols_total = n_sims + 1  # Add one column for scalar bars
+    plotter = pv.Plotter(
+        shape=(3, n_cols_total),
+        window_size=[150 * n_cols_total, 800],
+        off_screen=True,
+        border=False,
+    )
 
-        mappers = {"z": None, "J": None, "u_mag": None}
+    mappers = {"z": None, "J": None, "u_mag": None}
 
-        for row, qty in enumerate(quantities):
-            for col, label in enumerate(label_list):
-                plotter.subplot(row, col)
+    for row, qty in enumerate(quantities):
+        for col, label in enumerate(label_list):
+            plotter.subplot(row, col)
 
-                if label not in all_data or data_keys[qty] not in all_data[label]:
-                    plotter.add_text("Data Missing", font_size=10)
-                    continue
+            if label not in all_data or data_keys[qty] not in all_data[label]:
+                plotter.add_text("Data Missing", font_size=10)
+                continue
 
-                # --- Get data and warp mesh ---
-                grid_dg0 = base_grid_DG0.copy()
-                grid_dg0.cell_data[qty] = all_data[label][data_keys[qty]]
+            # --- Get data and warp mesh ---
+            grid_dg0 = base_grid_DG0.copy()
+            grid_dg0.cell_data[qty] = all_data[label][data_keys[qty]]
 
-                grid_p2 = base_grid_P2.copy()
-                grid_p2.point_data["u"] = all_data[label]["u_vec_data"].reshape(
-                    grid_p2.n_points, -1
-                )
-                warped_grid = grid_p2.warp_by_vector("u", factor=warp_scale)
-                warped_grid.cell_data[qty] = all_data[label][data_keys[qty]]
-                grid_to_plot = warped_grid
-                scalars_to_plot = qty
-                # --- End data/warp ---
+            grid_p2 = base_grid_P2.copy()
+            grid_p2.point_data["u"] = all_data[label]["u_vec_data"].reshape(
+                grid_p2.n_points, -1
+            )
+            warped_grid = grid_p2.warp_by_vector("u", factor=warp_scale)
+            warped_grid.cell_data[qty] = all_data[label][data_keys[qty]]
+            grid_to_plot = warped_grid
+            scalars_to_plot = qty
+            # --- End data/warp ---
 
-                actor = plotter.add_mesh(
-                    grid_to_plot,
-                    scalars=scalars_to_plot,
-                    cmap=cmaps[qty],
-                    clim=clims[qty],
-                    show_edges=False,
-                    scalar_bar_args=None,
-                    show_scalar_bar=False,
-                )
+            actor = plotter.add_mesh(
+                grid_to_plot,
+                scalars=scalars_to_plot,
+                cmap=cmaps[qty],
+                clim=clims[qty],
+                show_edges=False,
+                scalar_bar_args=None,
+                show_scalar_bar=False,
+            )
 
-                if (
-                    col == 0
-                    and mappers[qty] is None
-                    and actor
-                    and hasattr(actor, "mapper")
-                ):
-                    mappers[qty] = actor.mapper
+            if col == 0 and mappers[qty] is None and actor and hasattr(actor, "mapper"):
+                mappers[qty] = actor.mapper
 
-                # Add labels
-                #if row == 0:
-                #    plotter.add_text(
-                #        label.capitalize(),
-                #        font="arial",
-                #        position="upper_center",
-                #        font_size=9,
-                #    )
-                #if col == 0:
-                #    plotter.add_text(
-                #        titles[qty],
-                #        font="arial",
-                #        position="center_left",
-                #        font_size=9,
-                #        orientation=90,
-                #    )
+            # Add labels
+            # if row == 0:
+            #    plotter.add_text(
+            #        label.capitalize(),
+            #        font="arial",
+            #        position="upper_center",
+            #        font_size=9,
+            #    )
+            # if col == 0:
+            #    plotter.add_text(
+            #        titles[qty],
+            #        font="arial",
+            #        position="center_left",
+            #        font_size=9,
+            #        orientation=90,
+            #    )
 
-                plotter.camera_position = camera_pos
+            plotter.camera_position = camera_pos
 
-        # --- Add shared scalar bars ---
-        sbar_col_index = n_sims
-        sbar_args_common = {
-            "vertical": True,
-            "n_labels": 4,
-            "title_font_size": 9,
-            "label_font_size": 8,
-            "position_x": 0.4,
-            "position_y": 0.2,
-        }
+    # --- Add shared scalar bars ---
+    sbar_col_index = n_sims
+    sbar_args_common = {
+        "vertical": True,
+        "n_labels": 4,
+        "title_font_size": 9,
+        "label_font_size": 8,
+        "position_x": 0.4,
+        "position_y": 0.2,
+    }
 
-        for row, qty in enumerate(quantities):
-            plotter.subplot(row, sbar_col_index)
-            if mappers[qty]:
-                plotter.add_scalar_bar(
-                    title=titles[qty],
-                    mapper=mappers[qty],
-                    fmt=fmts[qty],
-                    **sbar_args_common,
-                )
-            else:
-                plotter.add_text(f"No data for\n{titles[qty]}", font_size=9, position="center")
+    for row, qty in enumerate(quantities):
+        plotter.subplot(row, sbar_col_index)
+        if mappers[qty]:
+            plotter.add_scalar_bar(
+                title=titles[qty],
+                mapper=mappers[qty],
+                fmt=fmts[qty],
+                **sbar_args_common,
+            )
+        else:
+            plotter.add_text(
+                f"No data for\n{titles[qty]}", font_size=9, position="center"
+            )
 
+    # --- 6. Save the plot ---
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    plotter.screenshot(output_file)
+    plotter.close()
 
-        # --- 6. Save the plot ---
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        plotter.screenshot(output_file)
-        plotter.close()
-
-        print(f"Successfully saved 3D grid plot to {output_file}")
+    print(f"Successfully saved 3D grid plot to {output_file}")
