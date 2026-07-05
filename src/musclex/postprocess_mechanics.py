@@ -54,8 +54,8 @@ class PostProcessor:
                 "cmap": "plasma",
                 "conversionfactor": 1.0,
             },
-            "von_mises": {
-                "title": "",  # Von Mises stress (kPa)
+            "fiber_stress": {
+                "title": "",  # Fiber stress (kPa)
                 "cmap": "GnBu",
                 "conversionfactor": 1e-3,  # Pa to kPa
             },
@@ -132,13 +132,25 @@ class PostProcessor:
         field_quantities["lambda"] = lambda_func
 
         # Von Mises stress
-        vm_func = dolfinx.fem.Function(DG0)
-        sigma_vm = self.material_local.stress_VM(P, F)
-        vm_expr = dolfinx.fem.Expression(
-            sigma_vm, get_interpolation_points(DG0.element)
+        #vm_func = dolfinx.fem.Function(DG0)
+        #sigma_vm = self.material_local.stress_VM(P, F)
+        #vm_expr = dolfinx.fem.Expression(
+        #    sigma_vm, get_interpolation_points(DG0.element)
+        #)
+        #vm_func.interpolate(vm_expr)
+        #field_quantities["von_mises"] = vm_func
+
+        # Fiber-direction stress
+        fiber_stress_func = dolfinx.fem.Function(DG0)
+        # Calculate current fiber direction: a = F * a0 / lambda
+        a_curr = (F * self.a0) / lmbda
+        # Project Cauchy stress onto the current fiber direction
+        sigma_ff = ufl.inner(sigma * a_curr, a_curr)
+        fs_expr = dolfinx.fem.Expression(
+            sigma_ff, get_interpolation_points(DG0.element)
         )
-        vm_func.interpolate(vm_expr)
-        field_quantities["von_mises"] = vm_func
+        fiber_stress_func.interpolate(fs_expr)
+        field_quantities["fiber_stress"] = fiber_stress_func
 
         # --- 2. Calculate scalar quantities for line plots ---
         force = self.material_local.reaction_force(sigma)
